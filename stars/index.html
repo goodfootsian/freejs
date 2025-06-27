@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stars</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="myCanvas">
+        <p>Add suitable fallback here.</p>
+    </canvas>
+    <script src="star_class.js"></script>
+    <script src="hip_db_15k.js"></script>
+    <script src="v3dlib.js"></script>
+    <script>
+        class Ctype {
+            constructor(constellation = "unknown", HD0 = "", HD1 = "") {
+                this.constellation = constellation;
+                this.HD0 = HD0;
+                this.HD1 = HD1;
+            }
+        }
+        var constellation = []
+        constellation.push(new Ctype('Gemini', '37826', '36850'));
+        constellation.push(new Ctype('Gemini', '37826', '35550'));
+        constellation.push(new Ctype('Gemini', '35550', '31681'));
+        constellation.push(new Ctype('Gemini', '36850', '32246'));
+        constellation.push(new Ctype('Gemini', '32246', '30343'));
+        constellation.push(new Ctype('Canis Major', '32349', '30324'));
+        constellation.push(new Ctype('Canis Major', '32349', '34444'));
+        constellation.push(new Ctype('Canis Major', '34444', '33579'));
+        constellation.push(new Ctype('Canis Major', '34444', '35904'));
+        constellation.push(new Ctype('Canis Major', '32349', '34045'));
+        constellation.push(new Ctype('Canis Major', '34045', '33160'));
+        constellation.push(new Ctype('Orion', 'xx', 'xx'));
+        constellation.push(new Ctype('Orion', '26727', '26311'));
+        constellation.push(new Ctype('Orion', '26311', '25930'));
+        constellation.push(new Ctype('Orion', '27366', '26727'));
+        constellation.push(new Ctype('Orion', '24436', '25930'));
+        constellation.push(new Ctype('Orion', '23123', '22797'));
+        constellation.push(new Ctype('Orion', '22797', '22549'));
+        constellation.push(new Ctype('Orion', '22549', '22449'));
+        constellation.push(new Ctype('Orion', '22449', '22509'));
+        constellation.push(new Ctype('Orion', '22509', '22845'));
+        constellation.push(new Ctype('Orion', '25930', '25930'));
+        constellation.push(new Ctype('Orion', '25930', '25336'));
+        constellation.push(new Ctype('Orion', '26727', '27989'));
+        constellation.push(new Ctype('Orion', '25336', '22449'));
+        constellation.push(new Ctype('Orion', '27989', '29038'));
+        constellation.push(new Ctype('Orion', '29038', '28716'));
+        constellation.push(new Ctype('Orion', '27989', '26207'));
+        constellation.push(new Ctype('Orion', '26207', '25336'));
+        constellation.push(new Ctype('Orion', '26237', '26237'));
+        constellation.push(new Ctype('Orion', '26237', '26221'));
+        constellation.push(new Ctype('Orion', '26221', '26241'));
+        constellation.push(new Ctype('Lyra', '91262', '91919'));
+        constellation.push(new Ctype('Lyra', '91919', '91971'));
+        constellation.push(new Ctype('Lyra', '91971', '91262'));
+        constellation.push(new Ctype('Lyra', '91971', '92791'));
+        constellation.push(new Ctype('Lyra', '92791', '93194'));
+        constellation.push(new Ctype('Lyra', '93194', '92420'));
+        constellation.push(new Ctype('Lyra', '92420', '91971'));
+        constellation.push(new Ctype('Ursa Major', '54061', '53910'));
+        constellation.push(new Ctype('Ursa Major', '53910', '58001'));
+        constellation.push(new Ctype('Ursa Major', '58001', '59774'));
+        constellation.push(new Ctype('Ursa Major', '59774', '54061'));
+        constellation.push(new Ctype('Ursa Major', '59774', '62956'));
+        constellation.push(new Ctype('Ursa Major', '62956', '65477'));
+        constellation.push(new Ctype('Ursa Major', '65378', '67301'));
+        constellation.push(new Ctype('Ursa Minor', '11767', '85822'));
+        constellation.push(new Ctype('Ursa Minor', '85822', '82080'));
+        constellation.push(new Ctype('Ursa Minor', '82080', '77055'));
+        constellation.push(new Ctype('Ursa Minor', '77055', '79822'));
+        constellation.push(new Ctype('Ursa Minor', '79822', '75097'));
+        constellation.push(new Ctype('Ursa Minor', '75097', '72607'));
+        constellation.push(new Ctype('Ursa Minor', '72607', '77055'));
+        constellation.push(new Ctype('Crux', '61084', '60718'));
+        constellation.push(new Ctype('Crux', '62434', '59747'));
+        constellation.push(new Ctype('Scorpio', '80763', '78821'));
+        constellation.push(new Ctype('Scorpio', '80763', '78401'));
+        constellation.push(new Ctype('Scorpio', '80763', '78265'));
+        constellation.push(new Ctype('Scorpio', '80763', '81266'));
+        constellation.push(new Ctype('Scorpio', '81266', '82396'));
+        constellation.push(new Ctype('Scorpio', '82396', '82545'));
+        constellation.push(new Ctype('Scorpio', '82545', '82729'));
+        constellation.push(new Ctype('Scorpio', '82729', '84143'));
+        constellation.push(new Ctype('Scorpio', '84143', '86228'));
+        constellation.push(new Ctype('Scorpio', '86228', '87073'));
+        constellation.push(new Ctype('Scorpio', '87073', '86670'));
+        constellation.push(new Ctype('Scorpio', '86670', '85927'));
+
+        constellation.push(new Ctype('Corona Borealis', '76127', '75695'));
+        constellation.push(new Ctype('Corona Borealis', '75695', '76267'));
+        constellation.push(new Ctype('Corona Borealis', '76267', '76952'));
+        constellation.push(new Ctype('Corona Borealis', '76952', '77512'));
+        constellation.push(new Ctype('Corona Borealis', '77512', '78159'));
+
+        constellation.push(new Ctype('Pegasus', '677', '113881'));
+        constellation.push(new Ctype('Pegasus', '113881', '113963'));
+        constellation.push(new Ctype('Pegasus', '113963', '1067'));
+        constellation.push(new Ctype('Pegasus', '1067', '677'));
+        constellation.push(new Ctype('Pegasus', '113963', '112447'));
+        constellation.push(new Ctype('Pegasus', '112447', '112029'));
+        constellation.push(new Ctype('Pegasus', '112029', '109427'));
+        constellation.push(new Ctype('Pegasus', '109427', '107315'));
+
+        constellation.push(new Ctype('Andromeda', '677', '3092'));
+        constellation.push(new Ctype('Andromeda', '3092', '5447'));
+        constellation.push(new Ctype('Andromeda', '5447', '9640'));
+
+        constellation.push(new Ctype('Perseus', '14328', '15863'));
+        constellation.push(new Ctype('Perseus', '15863', '14576'));
+        constellation.push(new Ctype('Perseus', '15863', '17358'));
+        constellation.push(new Ctype('Perseus', '17358', '18532'));
+        constellation.push(new Ctype('Perseus', '18532', '18246'));
+        constellation.push(new Ctype('Perseus', '18246', '17448'));
+
+        constellation.push(new Ctype('Cassiopeia', '8886', '6686'));
+        constellation.push(new Ctype('Cassiopeia', '6686', '4427'));
+        constellation.push(new Ctype('Cassiopeia', '4427', '3179'));
+        constellation.push(new Ctype('Cassiopeia', '3179', '746'));
+
+        constellation.push(new Ctype('Cygnus', '102098', '100453'));
+        constellation.push(new Ctype('Cygnus', '100453', '95947'));
+        constellation.push(new Ctype('Cygnus', '100453', '102488'));
+        constellation.push(new Ctype('Cygnus', '102488', '104732'));
+        constellation.push(new Ctype('Cygnus', '100453', '97165'));
+        constellation.push(new Ctype('Cygnus', '97165', '95853'));
+
+        constellation.push(new Ctype('Aquila', '97649', '98036'));
+        constellation.push(new Ctype('Aquila', '97649', '97278'));
+        constellation.push(new Ctype('Aquila', '98036', '99473'));
+        constellation.push(new Ctype('Aquila', '97649', '93747'));
+        constellation.push(new Ctype('Aquila', '93747', '95501'));
+        constellation.push(new Ctype('Aquila', '95501', '99473'));
+        constellation.push(new Ctype('Aquila', '95501', '97649'));
+        constellation.push(new Ctype('Aquila', '95501', '93805'));
+
+        constellation.push(new Ctype('Virgo', '65474', '64238'));  // (click RADE(RA=13.00, dm=101.50, DE=5.00, m=18.92))
+        constellation.push(new Ctype('Virgo', '64238', '66249'));  // (click RADE(RA=13.00, dm=352.66, DE=0.00, m=21.47))
+        constellation.push(new Ctype('Virgo', '64238', '61941'));  // (click RADE(RA=12.00, dm=416.96, DE=1.00, m=17.00))
+        constellation.push(new Ctype('Virgo', '61941', '60129'));  // (click RADE(RA=12.00, dm=203.88, DE=0.00, m=25.48))
+        constellation.push(new Ctype('Virgo', '60129', '57757'));  // (click RADE(RA=11.00, dm=506.21, DE=1.00, m=55.18))
+        constellation.push(new Ctype('Virgo', '57757', '57380'));  // (click RADE(RA=11.00, dm=463.73, DE=6.00, m=43.49))
+        constellation.push(new Ctype('Virgo', '61941', '63090'));  // (click RADE(RA=12.00, dm=560.17, DE=3.00, m=26.64))
+        constellation.push(new Ctype('Virgo', '63090', '63608'));  // (click RADE(RA=13.00, dm=27.15, DE=11.00, m=5.65))
+
+
+
+        const canvas = document.querySelector('.myCanvas');
+        const cwidth = canvas.width = window.innerWidth;
+        const cheight = canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+
+        // game status
+        const st_insertcoin = 0;
+        const st_playing = 1;
+        const st_gameover = 2;
+        var status = st_insertcoin;
+
+        // User Manual
+        var text2 = document.createElement('div');
+        text2.style.position = 'absolute';
+        text2.style.top = 0;
+        text2.style.left = 0;
+        text2.style.width = 100;
+        text2.style.height = 200;
+        text2.style.fontSize = "12px";
+        text2.style.color = "#505080";
+        text2.style.backgroundColor = "#00000000";
+        text2.innerHTML = ""
+        document.body.appendChild(text2);
+
+        // more text
+        var text3 = document.createElement('div');
+        text3.style.position = 'static';
+        text3.style.right = 0 + 'px';
+        text3.style.width = 500 + 'px';
+        text3.style.height = 500 + 'px';
+        text3.style.fontSize = "12px";
+        text3.style.color = "#505080";
+        text3.style.backgroundColor = "#00000000";
+        text3.innerHTML = "text3"
+        document.body.appendChild(text3);
+
+
+
+        // event listeners
+        var eventq = 0;
+        document.addEventListener('keydown', function (event) {
+            eventq = event.keyCode;
+        });
+
+        // mouse events
+        const mst_free = 0;
+        const mst_down = 1;
+        const mst_down2 = 2;
+        var mst = mst_free;
+        var mstart_x = 0;
+        var mstart_y = 0;
+        var mstart1_x = 0;
+        var mstart1_y = 0;
+
+        // add event listeners
+        canvas.addEventListener("click", mouseClick);
+        canvas.addEventListener("mousedown", mouseDown);
+        canvas.addEventListener("mousemove", mouseMove);
+        canvas.addEventListener("mouseup", mouseUp);
+        canvas.addEventListener("wheel", mouseWheel);
+
+        function mtWheel(x, y, f) {
+            //let twoD = screen.Screento2D(new V3Dtype(x, y, 0));
+            //let n = screen.twoDtoV3D(twoD.x, twoD.y);
+            {
+                let n0 = screen.ScreentoV3D(new V3Dtype(x, y, 0));
+                screen.magnification *= f;
+                let n1 = screen.ScreentoV3D(new V3Dtype(x, y, 0));
+                let np = n0.xproduct_n(n1);  // rotation axis
+                let angle = n0.angle(n1);
+                /*
+                console.log("angle = " + (angle / Math.PI * 180).toFixed(2))
+                console.log(n0.toString("n0"));
+                console.log(n1.toString("n1"));
+                console.log(np.toString("np"));
+                */
+                let m = new M3Dtype();
+                m.create_rot_n(np, -angle);
+                e = m.mmul(e);
+                eP = m.mmul(eP);
+                ego = e.toRADE();
+            }
+        }
+        function mouseWheel(evt) {
+            //console.log("wheel" + " deltaX=" + evt.deltaX.toFixed(0) + " deltaY=" + evt.deltaY.toFixed(0) + ", " + evt.pageX.toFixed(0) + ", " + evt.pageY.toFixed(0));
+            let f = 1.2;
+            if (evt.deltaY > 0) {
+                f = 1 / f;
+            } else if (evt.deltaY < 0) {
+                //
+            }
+            mtWheel(evt.pageX, evt.pageY, f);
+        }
+
+        function mouseClick(evt) {
+            //console.log('click ' + evt.pageX.toFixed(0) + ', ' + evt.pageY.toFixed(0));
+            let twoD = screen.Screento2D(new V3Dtype(evt.pageX, evt.pageY, 0));
+            //console.log(twoD.toString("2D"));
+            let n = screen.twoDtoV3D(twoD.x, twoD.y);
+            //console.log(n.toString("n") + n.toRADE().toString());
+            //console.log("next star: " + print_V3D_next_star(n));
+            print_V3D_next_star(n);
+            // show RADE on screen
+            let rade_n = n.toRADE();
+        }
+
+        function mouseDown(evt) {
+            mst = mst_down;
+            mstart_x = evt.pageX;
+            mstart_y = evt.pageY;
+            //console.log('mousedown ' + evt.pageX.toFixed(0) + ', ' + evt.pageY.toFixed(0));
+        }
+
+        function mouseUp(evt) {
+            switch (mst) {
+                case mst_down:
+                    mst = mst_free;
+                    break;
+            }
+        }
+
+        function mtMove(x, y) {
+            switch (mst) {
+                case mst_down:
+                    if (mstart_x == x && mstart_y == y) break;
+                    {
+                        let n0 = screen.ScreentoV3D(new V3Dtype(mstart_x, mstart_y, 0));
+                        let n1 = screen.ScreentoV3D(new V3Dtype(x, y, 0));
+                        let np = n0.xproduct_n(n1);  // rotation axis
+                        let angle = n0.angle(n1);
+                        /*
+                        console.log("angle = " + (angle / Math.PI * 180).toFixed(2))
+                        console.log(n0.toString("n0"));
+                        console.log(n1.toString("n1"));
+                        console.log(np.toString("np"));
+                        */
+                        let m = new M3Dtype();
+                        m.create_rot_n(np, -angle);
+                        e = m.mmul(e);
+                        eP = m.mmul(eP);
+                        ego = e.toRADE();
+
+                    }
+                    mstart_x = x;
+                    mstart_y = y;
+                    break;
+                default:
+                    break;
+            }
+            draw_field();
+        }
+        var mouseRADE = new RADEtype();
+        function mouseMove(evt) {
+            mtMove(evt.pageX, evt.pageY);
+            // show RADE on screen
+            let twoD = screen.Screento2D(new V3Dtype(evt.pageX, evt.pageY, 0));
+            let n = screen.twoDtoV3D(twoD.x, twoD.y);
+            mouseRADE = n.toRADE();
+            //console.log(mouseRADE.toString("mouseRADE"));
+        }
+
+        // touch events
+        canvas.addEventListener("touchstart", touchStart);
+        canvas.addEventListener("touchend", touchEnd);
+        canvas.addEventListener("touchcancel", touchCancel);
+        canvas.addEventListener("touchmove", touchMove);
+
+        function touchStart(evt) {
+            if (status == st_insertcoin) {
+                status = st_playing;
+                return;
+            }
+            evt.preventDefault();
+            const touches = evt.changedTouches;
+            console.log("touchStart - # of touch = " + touches.length.toFixed(0));
+            for (let i = 0; i < touches.length; i++) {
+                console.log(touches[i].pageX.toFixed(0) + ', ' + touches[i].pageY.toFixed(0));
+            }
+            if (touches.length == 1) {
+                mst = mst_down;
+                mstart_x = touches[0].pageX;
+                mstart_y = touches[0].pageY;
+                console.log("t1start, " + touches[0].pageX.toFixed(0) + ", " + touches[0].pageY.toFixed(0));
+            }
+            else if (touches.length == 2) {
+                mst = mst_down2;
+                mstart_x = touches[0].pageX;
+                mstart_y = touches[0].pageY;
+                mstart1_x = touches[1].pageX;
+                mstart1_y = touches[1].pageY;
+                console.log("t2start, " + touches[0].pageX.toFixed(0) + ", " + touches[0].pageY.toFixed(0) + " ||| " + touches[1].pageX.toFixed(0) + ", " + touches[1].pageY.toFixed(0));
+            }
+        }
+        function touchEnd(evt) {
+            evt.preventDefault();
+            const touches = evt.changedTouches;
+            console.log("touchEnd - # of touch = " + touches.length.toFixed(0));
+            for (let i = 0; i < touches.length; i++) {
+                //console.log('end! ' + touches[i].pageX.toFixed(0) + ', ' + touches[i].pageY.toFixed(0));
+            }
+            mst = mst_free;
+        }
+        function touchCancel(evt) {
+            mst = mst_free;
+        }
+        function tZoom() {
+
+        }
+        function touchMove(evt) {
+            evt.preventDefault();
+            const touches = evt.changedTouches;
+            //console.log("touchMove - # of touch = " + touches.length.toFixed(0));
+            for (let i = 0; i < touches.length; i++) {
+                //console.log('move to ' + touches[i].pageX.toFixed(0) + ', ' + touches[i].pageY.toFixed(0));
+            }
+            if (touches.length == 1) {
+                switch (mst) {
+                    case mst_down:
+                        console.log("t1move, " + touches[0].pageX.toFixed(0) + ", " + touches[0].pageY.toFixed(0));
+                        mtMove(touches[0].pageX, touches[0].pageY);
+                        break;
+                }
+            }
+            else if (touches.length == 2) {
+                switch (mst) {
+                    case mst_free:
+                    case mst_down:
+                        mst = mst_down2;
+                        mstart_x = touches[0].pageX;
+                        mstart_y = touches[0].pageY;
+                        mstart1_x = touches[1].pageX;
+                        mstart1_y = touches[1].pageY;
+                        break;
+                    case mst_down2:
+                        {
+                            let a0 = new V3Dtype(mstart_x, mstart_y, 0);
+                            let b0 = new V3Dtype(mstart1_x, mstart1_y, 0);
+                            let a1 = new V3Dtype(touches[0].pageX, touches[0].pageY, 0);
+                            let b1 = new V3Dtype(touches[1].pageX, touches[1].pageY, 0);
+                            let d0 = a0.distance(b0);
+                            let d1 = a1.distance(b1);
+                            let m = a0.clone();
+                            m.add(a1);
+                            m.add(b0);
+                            m.add(b1);
+                            m.mul(.25);
+                            if (d0 < 100) break;
+                            if (d1 < 100) break;
+                            if (d0 == d1) break;
+                            //console.log("start points: " + a0.toString("a0") + " " + b0.toString("b0") + " d0=" + d0);
+                            //console.log("end points: " + a1.toString("a0") + " " + b1.toString("b0") + " d1=" + d0);
+                            //console.log("middle point: " + m.toString("m") + ", d1/d0=" + (d1 / d0).toFixed(2));
+                            console.log("t2move, " + touches[0].pageX.toFixed(0) + ", " + touches[0].pageY.toFixed(0) + " ||| " + touches[1].pageX.toFixed(0) + ", " + touches[1].pageY.toFixed(0) + ", d0=" + d0.toFixed(2) + ", " + m.toString("m") + ", magnification=" + screen.magnification.toFixed(2));
+                            mtWheel(m.x, m.y, d1 / d0);
+                            mstart_x = touches[0].pageX;
+                            mstart_y = touches[0].pageY;
+                            mstart1_x = touches[1].pageX;
+                            mstart1_y = touches[1].pageY;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+
+        var Tschioo = new Audio('Tschioo.mp3');
+        var Prrt = new Audio('Prrt.mp3');
+        var Bouff = new Audio('Bouff.mp3');
+        var Flick = new Audio('Flick.mp3');
+        var Swoosh = new Audio('Swoosh.mp3');
+        var Dioomm = new Audio('Dioomm.mp3');
+        var Tetris = new Audio('stars theme.mp3');
+        Tetris.volume = 0.01;
+
+        // point of view
+        var ego = new RADEtype(6, 0, 1, 0, 0);
+        var egoP = new RADEtype(0, 0, 1, 90, 0);
+        var e = ego.toV3D();
+        var eP = egoP.toV3D();
+
+        // ecliptic
+        const eclipticRADE = new RADEtype(18, 0, 1, 66, 34);
+        const eclipticN = eclipticRADE.toV3D();
+
+        // the screen
+        var screen = new SCREENtype(cwidth, cheight, 600);
+        screen.p0x = new NAtype(e.xproduct_n(eP), e);
+        screen.p0y = new NAtype(eP, e);
+        screen.na = new NAtype(e, e);
+        function to360(a) {
+            while (a >= 360) a -= 360;
+            return a;
+        }
+        var Sun = new RADEtype();
+        {
+            // calculate sun position
+            const UTC0 = 2440587.5;
+            let t0 = Date.now();
+            let JD = UTC0 + t0 / 86400000;
+            console.log("JD =" + JD.toString());
+            /*
+                        let JDwikipedia = 2440587.5 + Date.UTC(2024, 9 - 1, 10, 11, 12, 0) / 86400000;
+                        // Date.UTC() liefert die Zeit in ms seit 1. Januar 1970, 00:00 UTC (= JD 2440587,5).
+                        // Monate müssen im Wertebereich 0 .. 11 übergeben werden.
+                        console.log("JDwikipedia =" + JDwikipedia.toString());
+                        */
+            let D = JD - 2451545.0; // D, the number of days and fraction (+ or –) from the epoch referred to as "J2000.0", which is 2000 January 1.5, Julian date 2451545.0:
+            let g = 357.529 + 0.98560028 * D;
+            let q = 280.459 + 0.98564736 * D;
+            let L = q + 1.915 * Math.sin(g / 180 * Math.PI) + 0.020 * Math.sin(2 * g / 180 * Math.PI);
+            let R = 1.00014 - 0.01671 * Math.cos(g / 180 * Math.PI) - 0.00014 * Math.cos(2 * g / 180 * Math.PI);
+            let e = 23.439 - 0.00000036 * D;
+            let RA = Math.atan2(Math.cos(e / 180 * Math.PI) * Math.sin(L / 180 * Math.PI), Math.cos(L / 180 * Math.PI));
+            RA = RA / Math.PI * 180 / 15;
+            let d = Math.asin(Math.sin(e / 180 * Math.PI) * Math.sin(L / 180 * Math.PI));
+            d = d / Math.PI * 180;
+            console.log("Sun RA=" + RA.toString() + ", d=" + d.toString());
+            Sun = new RADEtype(RA, 0, 1, d, 0);
+        }
+        var Moon = new RADEtype(0, 0, 1, 0, 0); //
+        {
+            let arrow = (val) => "===>" + val;
+            // calculate sun position
+            const UTC0 = 2440587.5;
+            let t0 = Date.now();
+            let JD = UTC0 + t0 / 86400000;
+            console.log("JD =" + JD.toString());
+            /*
+                        let JDwikipedia = 2440587.5 + Date.UTC(2024, 9 - 1, 10, 11, 12, 0) / 86400000;
+                        // Date.UTC() liefert die Zeit in ms seit 1. Januar 1970, 00:00 UTC (= JD 2440587,5).
+                        // Monate müssen im Wertebereich 0 .. 11 übergeben werden.
+                        console.log("JDwikipedia =" + JDwikipedia.toString());
+                        */
+            let D = JD - 2451545.0;
+            let Tau = D / 36525; // number of Julian centuries since 2000/01/01 at 12 UT
+            // Mittlere epliktikale Länge
+            let Lambda = 218.31665 + 481267.88134 * Tau;
+            console.log("Moon ecliptic length Lambda/°=" + Lambda.toString());
+            Lambda = to360(Lambda);
+            console.log("Moon ecliptic length Lambda/°=" + Lambda.toString());
+            //Lambda = 2.6 * 15;
+            // Große Ungleichheit
+            let L = (val) => 134.96 + 477198.87 * val;
+            let big_ne = 6.289 * Math.sin(L(Tau) / 180 * Math.PI) + 0.214 * Math.sin(2 * L(Tau)) + 0.01 * Math.sin(3 * L(Tau));
+            console.log("big_ne/°=" + big_ne.toString());
+            Lambda += big_ne;
+            console.log("Moon ecliptic length Lambda/°=" + Lambda.toString());
+            // Ekliptikale Breite
+            let F = 0;
+            FM = 93.272 + 13.229 * 36525 * Tau;  // https://de.wikipedia.org/wiki/Mondbahn#Fundamentalargumente
+            FM = 93.272 + 483202.018 * Tau;  // https://www.physik.uni-siegen.de/didaktik/materialien_offen/excel/gestoerte_mondba_ergaenzungen.pdf
+            FM = to360(FM);
+            console.log("Moon distance to node FM°=" + FM.toString());
+            let Lat = Math.sin(FM) * 5;
+            console.log("Moon ecliptic latitude Lat°=" + Lat.toString());
+            // transform ecliptic to earth coordinates
+            let springRADE = new RADEtype(0, 0, 1, Lat, 0);
+            let pos0 = springRADE.toV3D();
+            let rot2deg = new M3Dtype();
+            rot2deg.create_rot_n(eclipticN, Lambda * Math.PI / 180);
+            let pos1 = rot2deg.mmul(pos0);
+            let pos0RADE = pos0.toRADE();
+            let pos1RADE = pos1.toRADE();
+            Moon = pos1RADE;
+            console.log("Moon RA=" + Moon.toString("MoonRADE"));
+        }
+        var MyPosition = new RADEtype(8.75 / 15, 1, 48, 43);  // Empfingen
+        {
+            // test SCREENtype
+            console.log("test SCREENtype part 1 ");
+            let starpos = new RADEtype(0, 0, 1, 45, 0);
+            {
+                console.log(screen.toString("screen before"));
+                console.log(starpos.toString("Polar"));
+                let starpos_cart = starpos.toV3D();
+                console.log(starpos_cart.toString("3D"));
+                let s2d = screen.na.to2D(screen.p0x, screen.p0y, starpos_cart);
+                console.log(s2d.toString("2D"));
+                let ss = screen.twoDtoScreen(s2d);
+                console.log(ss.toString("Screen"));
+                let s2d2 = screen.Screento2D(ss);
+                console.log(s2d2.toString("back to 2D"));
+                //let t = screen.toV3D(s.x, s.y);
+                let t = screen.twoDtoV3D(s2d2.x, s2d2.y);
+                console.log(t.toString("back to 3D"));
+                let u = t.toRADE();
+                console.log(u.toString("back to Polar"));
+                console.log("cartesian coordinates before/after " + starpos_cart.toString() + t.toString());
+                console.log("polar coordinates before/after " + starpos.toString() + u.toString());
+                console.log(screen.toString("screen after"));
+
+            }
+            {
+                console.log("test SCREENtype part 2 -----------------");
+                let s = screen.V3DtoScreen(starpos.toV3D());
+                console.log(s.toString("Screen"));
+                let twoD = screen.Screento2D(s);
+                let t = screen.twoDtoV3D(twoD.x, twoD.y);
+                console.log(t.toString("back to 3D"));
+                let u = t.toRADE();
+                console.log(u.toString("back to Polar"));
+            }
+            console.log("test SCREENtype END -----------------");
+        }
+        var show_constellations = true;
+        var show_grid = true;
+        var show_test = false;
+        var show_names = true;
+        var rot_deg = 5;
+        {
+            let n = new V3Dtype(0.99, 0.13, 0.06);
+            let rade = n.toRADE();
+            console.log(rade.toString());
+        }
+
+        function RADEtoV3D(rade) {
+            let a = new V3Dtype;
+            //r = cos();
+            return a;
+        }
+        function get_star_radius(mag) {
+            /*
+            if (mag < 3) return 2;
+            if (mag < 2) return 3;
+            return 1;
+            */
+            /*
+            let r = 1;
+            if (mag < 2) r = 1;
+            if (mag < 1) r = 2;
+            if (mag < 0) r = 3;
+            if (mag < -1) r = 4;
+            */
+            let ulux = 1e8 * Math.pow(10, -0.4 * (mag + 14.2));
+            let r = Math.sqrt(ulux / Math.PI);
+            return r;
+        }
+        {
+            for (let i = -2; i < 7; ++i) {
+                console.log(i.toFixed(1) + ' => ' + get_star_radius(i).toFixed(2))
+            }
+        }
+        /*
+        function getRGB(color, mag) {
+            let rgb = 0;
+            switch (color.charAt()) {
+                case 'O': rgb = new V3Dtype(100, 100, 255); break;
+                case 'B': rgb = new V3Dtype(150, 150, 255); break;
+                case 'A': rgb = new V3Dtype(220, 220, 255); break;
+                case 'F': rgb = new V3Dtype(255, 255, 220); break;
+                //case 'G': rgb = new V3Dtype(255, 255, 100); break;
+                case 'G': rgb = new V3Dtype(0xFD, 0xF9, 0xB3); break;
+                case 'K': rgb = new V3Dtype(255, 127, 100); break;
+                case 'M': rgb = new V3Dtype(255, 100, 64); break;
+                default: rgb = new V3Dtype(200, 200, 200); break;
+            }
+            if (mag > 4) rgb.mul(.9);
+            if (mag > 5) rgb.mul(.9);
+            if (mag > 6) rgb.mul(.9);
+            let s = rgb.toRGB();
+            return s;
+        }
+        // https://de.wikipedia.org/wiki/Spektralklasse
+let O = "#9BB0FF;" //    <td>blau</td>
+let B = "#BFD8FF;"> //    <td>blau-weiß</td>
+let A = "#E4E8FC;"> //<td>weiß (leicht bläulich)</td>
+let F = "#F9FAE7;"> //<td>weiß-gelb</td>
+let G = "#FDF9B3;"> //<td>gelb</td>
+let K = "#FFDD99;"> //<td>orange</td>
+let M = "#FFC886;"> //<td>rot-orange</td>
+*/
+        function getHSB(color) {
+            let rgb = 0;
+            switch (color.charAt()) {
+                case 'O': rgb = new V3Dtype(0x9B, 0xB0, 0xFF); break;
+                case 'B': rgb = new V3Dtype(0xBF, 0xD8, 0xFF); break;
+                case 'A': rgb = new V3Dtype(0xE4, 0xE8, 0xFC); break;
+                case 'F': rgb = new V3Dtype(0xF9, 0xFA, 0xE7); break;
+                case 'G': rgb = new V3Dtype(0xFD, 0xF9, 0xB3); break;
+                case 'K': rgb = new V3Dtype(0xFF, 0xDD, 0x99); break;
+                case 'M': rgb = new V3Dtype(0xFF, 0xC8, 0x86); break;
+                default: rgb = new V3Dtype(0xff, 0xff, 0xff); break;
+            }
+            return rgb.rgbToHsb();
+        }
+        function getRGB(color, mag) {
+            let hsb = getHSB(color);
+            //let hsb = rgb.rgbToHsb();
+            hsb.z = (9 - mag) / 10 * 100;
+            hsb.z = 20 + 80 * get_star_radius(mag) / get_star_radius(-1.5);
+            if (hsb.z >= 100) hsb.z = 100;
+            return hsb.hsbToRgb().toRGB();
+            if (mag > 4) rgb.mul(.9);
+            if (mag > 5) rgb.mul(.9);
+            if (mag > 6) rgb.mul(.9);
+            let s = rgb.toRGB();
+            return s;
+        }
+        var szt_color = [];
+        szt_color.push('#8080ff');
+        szt_color.push('#80ff80');
+        szt_color.push('#80ffff');
+        szt_color.push('#ff8080');
+        szt_color.push('#ff80ff');
+        szt_color.push('#ffff80');
+        szt_color.push('#ffffff');
+        function draw_star(mag, color, x, y) {
+            let sz = get_star_radius(mag);
+            // the star
+            ctx.fillStyle = getRGB(color, mag);
+            ctx.beginPath();
+            if (sz > 4) sz = 4;
+            ctx.arc(x, y, sz * 3 / 4 + 1, 0, 2 * Math.PI);
+            ctx.fill();
+            /*
+            // szintillation: refractions
+            const n = 8;
+            for (let i = 0; i < n; i += 1) {
+                if (Math.random() < .9) continue;
+                ctx.fillStyle = szt_color[Math.trunc(Math.random() * szt_color.length)];
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.ellipse(x, y, sz, sz, 0, 2 * Math.PI / n * i, 2 * Math.PI / n * (i + 1));
+                ctx.fill();
+            }
+            */
+        }
+        function draw_line(mag, color, x0, y0, x1, y1) {
+            let sz = get_star_radius(mag);
+            ctx.strokeStyle = getRGB(color, mag);
+            // Start a new Path
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            // Draw the Path
+            ctx.stroke();
+        }
+        function draw_line_on_screen(p1, p2, mag, color) {
+            let s1c = p1.toV3D();
+            let s2c = p2.toV3D();
+            let s1 = screen.V3DtoScreen(s1c);
+            if (screen.na.error) return;
+            let s2 = screen.V3DtoScreen(s2c);
+            if (screen.na.error) return;
+            draw_line(mag, color, s1.x, s1.y, s2.x, s2.y);
+        }
+        function draw_star_on_screen(p1, mag, color) {
+            let s1c = p1.toV3D();
+            // convert to screen coordinates
+            let s1 = screen.V3DtoScreen(s1c);
+            if (screen.na.error) return;
+            // add positional szintillation on screen level
+            {
+                // position
+                let dev_angle = Math.random() * 2 * Math.PI;
+                let dev_r = Math.random() / 10000;
+                s1.x += Math.cos(dev_angle) * dev_r * screen.magnification;
+                s1.y += Math.sin(dev_angle) * dev_r * screen.magnification;
+            }
+            let sz = get_star_radius(mag);
+            let hsb = getHSB(color);
+            hsb.z = (8 - mag) / 10 * 100;
+            //hsb.z = 100;
+            // add brightness szintillation
+            if (Math.random() < .01) {
+                hsb.z *= Math.random();
+            }
+            // draw the circle
+            ctx.fillStyle = hsb.hsbToRgb().toRGB();
+            ctx.beginPath();
+            if (sz > 4) sz = 4;
+            ctx.arc(s1.x, s1.y, sz * 3 / 4 + 1, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        function draw_planet_on_screen(p1, minutes, color) {
+            // calculate position on screen
+            let s1c = p1.toV3D();
+            let r = 0.5 * minutes / 60 * Math.PI / 180;
+            let s1 = screen.V3DtoScreen(s1c);
+            if (screen.na.error) return;
+            // calculate position of border point on screen
+            let sp = s1c.clone();
+            let rvec = eP.clone();
+            sp.add(rvec.mul(r));
+            let s2 = screen.V3DtoScreen(sp);
+            //
+            let sz = s2.distance(s1);
+            ctx.fillStyle = getRGB(color, 0);
+            ctx.beginPath();
+            ctx.arc(s1.x, s1.y, sz, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        function draw_text_on_screen(p1, mag, color, text, magStar) {
+            let s1c = p1.toV3D();
+            let s1 = screen.V3DtoScreen(s1c);
+            if (screen.na.error) return;
+            let sz = get_star_radius(mag);
+            ctx.fillStyle = getRGB(color, magStar);
+            ctx.font = '12px georgia';
+            ctx.textAlign = "left";
+            ctx.textBaseline = 'top'
+            ctx.fillText(text, s1.x + sz, s1.y + sz);
+        }
+        function draw_x_on_screen(p, mag, color, text, magStar) {
+            {
+                let p0 = p.clone();
+                let p1 = p.clone();
+                p0.d += 1;
+                p1.d -= 1;
+                draw_line_on_screen(p0, p1, mag, color);
+            }
+            {
+                let p0 = p.clone();
+                let p1 = p.clone();
+                p0.h += 1 / 15;
+                p1.h -= 1 / 15;
+                draw_line_on_screen(p0, p1, mag, color);
+            }
+        }
+        var fifo_i = 0;
+        var fifo = [];
+        fifo.push('');
+        fifo.push('');
+        function print_V3D_next_star(n) {
+            // n has format 3D (not RADE)
+            let best_d = 100;
+            let best_i = -1;
+            for (let i = 0; i < stars.length; ++i) {
+                let starRADE = new RADEtype(stars[i].h, stars[i].dm, stars[i].dsign, stars[i].d, stars[i].m);
+                let starpoint = starRADE.toV3D();
+                let d = starpoint.distance(n);
+                if (d < best_d) {
+                    best_d = d;
+                    best_i = i;
+                }
+            }
+            let str = "not found";
+            if (best_i >= 0) {
+                str = ""; //best_i.toFixed(0);
+                str += stars[best_i].HD;
+                str += " ";
+                str += "\"";
+                str += stars[best_i].name;
+                str += "\"";
+                //
+                fifo[fifo_i] = stars[best_i].HD;
+                fifo_i = (fifo_i + 1) % 2;
+                if (fifo_i == 0) {
+                    console.log("constellation.push(new Ctype('unknown', '" + fifo[0] + "', '" + fifo[1] + "'));" + "  // (" + n.toRADE().toString("click RADE") + ")");
+                }
+            }
+            return str;
+        }
+        function lookup_star(HD) {
+            for (let i = 0; i < stars.length; ++i) {
+                if (stars[i].HD == HD) {
+                    return new RADEtype(stars[i].h, stars[i].dm, stars[i].dsign, stars[i].d, stars[i].m);
+                }
+            }
+            return new RADEtype(0, 0, 1, 0, 0);
+
+        }
+        function draw_field() {
+            // fill with background color
+            ctx.fillStyle = 'rgb(0, 0, 0)';
+            ctx.fillRect(0, 0, cwidth, cheight);
+            // text
+            ctx.fillStyle = 'blue';
+            ctx.font = '24px georgia';
+            screen.p0x = new NAtype(e.xproduct_n(eP), e);
+            screen.p0y = new NAtype(eP, new V3Dtype(0, 0, 0));
+            screen.na = new NAtype(e, e);
+            if (show_constellations) {
+                // draw constellations
+                for (let i = 0; i < constellation.length; ++i) {
+                    let s0 = lookup_star(constellation[i].HD0);
+                    let s1 = lookup_star(constellation[i].HD1);
+                    draw_line_on_screen(s0, s1, 7, "G2");
+                }
+            }
+            if (show_grid) {
+                // draw north pole
+                {
+                    draw_line_on_screen(new RADEtype(0, 0, 1, 88, 0), new RADEtype(12, 0, 1, 88, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(6, 0, 1, 88, 0), new RADEtype(18, 0, 1, 88, 0), 6, "G2");
+                    draw_text_on_screen(new RADEtype(0, 0, 1, 90, 0), 1, "G2", "North Pole", 6);
+                    // color test
+                    if (show_test) for (let mag = -1; mag < 8; ++mag) {
+                        draw_star_on_screen(new RADEtype(5, 0, 1, mag * 3, 0), mag, "O");
+                        draw_star_on_screen(new RADEtype(5, 200, 1, mag * 3, 0), mag, "B");
+                        draw_star_on_screen(new RADEtype(5, 400, 1, mag * 3, 0), mag, "A");
+                        draw_star_on_screen(new RADEtype(6, 0, 1, mag * 3, 0), mag, "F");
+                        draw_star_on_screen(new RADEtype(6, 200, 1, mag * 3, 0), mag, "G");
+                        draw_star_on_screen(new RADEtype(6, 400, 1, mag * 3, 0), mag, "K");
+                        draw_star_on_screen(new RADEtype(7, 0, 1, mag * 3, 0), mag, "M");
+                    }
+                }
+                // draw south pole
+                {
+                    draw_line_on_screen(new RADEtype(0, 0, -1, 88, 0), new RADEtype(12, 0, -1, 88, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(6, 0, -1, 88, 0), new RADEtype(18, 0, -1, 88, 0), 6, "G2");
+                    draw_text_on_screen(new RADEtype(0, 0, -1, 90, 0), 1, "G2", "South Pole", 6);
+                }
+                // draw equator and wendekreise
+                for (let i = 0; i < 360; i += 2) {
+                    const ecliptic_obliquity = 23.4; // degrees
+                    const polar_de = 66.5; // degrees
+                    draw_line_on_screen(new RADEtype(i / 15, 0, 1, 0, 0), new RADEtype((i + 1) / 15, 0, 1, 0, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(i / 15, 0, 1, ecliptic_obliquity, 0), new RADEtype((i + 1) / 15, 0, 1, ecliptic_obliquity, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(i / 15, 0, -1, ecliptic_obliquity, 0), new RADEtype((i + 1) / 15, 0, -1, ecliptic_obliquity, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(i / 15, 0, 1, polar_de, 0), new RADEtype((i + 1) / 15, 0, 1, polar_de, 0), 6, "B2");
+                    draw_line_on_screen(new RADEtype(i / 15, 0, -1, polar_de, 0), new RADEtype((i + 1) / 15, 0, -1, polar_de, 0), 6, "B2");
+                }
+                // draw hours at equator
+                for (let i = 0; i < 24; ++i) {
+                    draw_text_on_screen(new RADEtype(i, 0, 1, 0, 0), 1, "G2", i.toString(), 6);
+                }
+                // draw ecliptic
+                {
+                    // North: right ascension 18h 0m 0.0s (exact), declination +66° 33′ 38.55″
+                    const step = .1;
+                    let springRADE = new RADEtype(0, 0, 1, 0, 0);
+                    let pos0 = springRADE.toV3D();
+                    let rot2deg = new M3Dtype();
+                    rot2deg.create_rot_n(eclipticN, step * Math.PI / 180);
+                    for (let i = 0; i < 360; i += 2 * step) {
+                        let pos1 = rot2deg.mmul(pos0);
+                        let pos0RADE = pos0.toRADE();
+                        let pos1RADE = pos1.toRADE();
+                        //console.log(pos0RADE.toString() + ' ' + pos0.toString() + ' => ' + pos1RADE.toString() + ' ' + pos1.toString());
+                        draw_line_on_screen(pos0RADE, pos1RADE, 6, "G2");
+                        pos0 = rot2deg.mmul(pos1);
+                    }
+                    draw_text_on_screen(new RADEtype(0, 0, 1, 0, 0), 1, "G2", "Frühlingspunkt", 6);
+                    draw_text_on_screen(new RADEtype(12, 0, 1, 0, 0), 1, "G2", "Herbstpunkt", 6);
+                    draw_text_on_screen(new RADEtype(6, 0, 1, 0, 0), 1, "G2", "Sommersonnenwende", 6);
+                    draw_text_on_screen(new RADEtype(18, 0, 1, 0, 0), 1, "G2", "Wintersonnenwende", 6);
+                }
+                // draw 0 and 12 meridian
+                for (let i = 1; i < 87; i += 2) {
+                    draw_line_on_screen(new RADEtype(0, 0, 1, i, 0), new RADEtype(0, 0, 1, i + 1, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(12, 0, 1, i, 0), new RADEtype(12, 0, 1, i + 1, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(0, 0, -1, i, 0), new RADEtype(0, 0, -1, i + 1, 0), 6, "G2");
+                    draw_line_on_screen(new RADEtype(12, 0, -1, i, 0), new RADEtype(12, 0, -1, i + 1, 0), 6, "G2");
+                }
+            }
+            // draw stars
+            let cnt = 0;
+            for (let i = 0; i < stars.length; ++i) {
+                cnt++;
+                //if (stars[i].Ptm < 6) continue;
+                let starRADE = new RADEtype(stars[i].h, stars[i].dm, stars[i].dsign, stars[i].d, stars[i].m);
+                //let starpoint = starRADE.toV3D();
+                draw_star_on_screen(starRADE, stars[i].Ptm, stars[i].SpT);
+                if (show_names && stars[i].name.length && stars[i].Ptm < 2.5) {
+                    draw_text_on_screen(starRADE, stars[i].Ptm, stars[i].SpT, stars[i].name, 6);
+                }
+            }
+            // draw sun
+            {
+                draw_planet_on_screen(Sun, 31, "G2");
+                if (show_names) {
+                    draw_text_on_screen(Sun, 0, "G2", "Sun", 6);
+                }
+            }
+            // draw moon
+            {
+                draw_planet_on_screen(Moon, 31, "G2");
+                if (show_names) {
+                    draw_text_on_screen(Moon, 0, "G2", "Moon", 6);
+                }
+            }
+            // inscription
+            text2.innerHTML = "<h2>"
+                + "Position: " + ego.toString('View') + "<br>"
+                + "Mouse: " + mouseRADE.toString('mouse') + "<br>"
+                + 'Stars: ' + cnt.toString() + "<br>"
+                + "Keys:" + "<br>"
+                + "N     switch star names on/off" + "<br>"
+                + "G     switch grid on/off" + "<br>"
+                + "C     switch constellations on/off" + "<br>"
+                ;
+            //console.log("date=" + Date.now().toString());
+            // Zenith
+            {
+                let t0 = Date.now() / 1000;
+                let hour = t0 / 3600;
+                //console.log("Hour=" + hour.toString());
+                let zenith = MyPosition.clone();
+                zenith.h += hour;
+                //console.log(zenith.toString("Zenith"));
+                draw_text_on_screen(zenith, 1, "G2", "Zenit in Epmfingen", 6);
+                draw_x_on_screen(zenith, 1, "G2", "Zenit in Epmfingen", 6);
+            }
+            // last action: refresh timestamp
+            tm1 = Date.now();
+        }
+        var tm1 = 0;
+        function loop() {
+            if (status == st_insertcoin) {
+                //process event:
+                switch (eventq) {
+                    case 32:
+                    case 13:
+                        //Tetris.play();
+                        status = st_playing;
+                        break;
+                }
+                eventq = 0;
+                // fill with background color
+                ctx.fillStyle = 'rgb(5, 5, 25)';
+                ctx.fillRect(0, 0, cwidth, cheight);
+                // text
+                ctx.fillStyle = 'blue';
+                ctx.font = '128px georgia';
+                ctx.fillText('STARS', 100, 100);
+                ctx.font = '48px georgia';
+                ctx.fillText('Press SPACE to start', 100, 200);
+            }
+            else if (status == st_gameover) {
+                //process event:
+                switch (eventq) {
+                    case 32:
+                    case 13:
+                        Flick.play();
+                        status = st_insertcoin;
+                        break;
+                }
+                eventq = 0;
+                // fill with background color
+                ctx.fillStyle = 'rgb(255, 255, 255)';
+                ctx.fillRect(0, 0, cwidth, cheight);
+                // draw
+                draw_field(ctx);
+                // text
+                ctx.fillStyle = 'red';
+                ctx.font = '64px georgia bold';
+                ctx.fillText('GAME OVER', getox(0), getoy(height / 2 - 2));
+                ctx.font = '48px georgia';
+                ctx.fillText('Press SPACE', getox(0), getoy(height / 2));
+            }
+            else if (status == st_playing) {
+                //process event:
+                switch (eventq) {
+                    case 37:
+                        //yaw left
+                        {
+                            // eP is the yaw axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(eP, rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 39:
+                        //yaw right
+                        {
+                            // eP is the yaw axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(eP, -rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 38:
+                        //pitch up
+                        {
+                            let a = e.xproduct_n(eP)
+                            // a is the pitch axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(a, rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 40:
+                        //pitch down
+                        {
+                            let a = e.xproduct_n(eP)
+                            // a is the pitch axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(a, -rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 67: // 'C':
+                        show_constellations = !show_constellations;
+                        break;
+                    case 71: // 'G':
+                        show_grid = !show_grid;
+                        break;
+                    case 78: // 'N':
+                        show_names = !show_names;
+                        break;
+                    case 84: // 'T':
+                        show_test = !show_test;
+                        break;
+                    case 76: // 'L'
+                        //roll left
+                        {
+                            // e is the roll axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(e, rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 82:
+                        //roll right
+                        {
+                            // e is the roll axis
+                            let m = new M3Dtype();
+                            m.create_rot_n(e, -rot_deg * Math.PI / 180);
+                            e = m.mmul(e);
+                            eP = m.mmul(eP);
+                            ego = e.toRADE();
+                        }
+                        break;
+                    case 32:
+                        //space
+                        break;
+                    case 107: //num +
+                    case 187: //keyboard+
+                        // plus
+                        screen.magnification *= 1.2;
+                        break;
+                    case 109: //num-
+                    case 189: //keyboard-
+                        //minus
+                        screen.magnification /= 1.2;
+                        break;
+                }
+                eventq = 0;
+                // draw
+                {
+                    let t = Date.now();
+                    if (t - tm1 > 99) {
+                        draw_field(ctx);
+                    }
+
+
+                }
+            }
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
