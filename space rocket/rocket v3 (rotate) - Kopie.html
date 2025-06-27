@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="myCanvas">
+        <p>Add suitable fallback here.</p>
+    </canvas>
+    <script>
+        const canvas = document.querySelector('.myCanvas');
+        const cwidth = canvas.width = window.innerWidth;
+        const cheight = canvas.height = window.innerHeight;
+        const resolution = 30;
+        var finey = 0;
+        var highspeed = false;
+        var part = [];
+        const width = 10;
+        const height = 15;
+        const n_part = 7;
+        const n_rot = 4;
+        const n_sq = 4;
+        const sqsize = parseInt(cheight / (height + 1));
+        var orgx = parseInt((cwidth - sqsize * width) / 2);
+        const orgy = sqsize / 2;
+        var posx = width / 2;
+        var score = 0;
+        const dimheight_m = 15;
+        const rocket_height = 2.5;
+        var rocket_y = 10;
+        var rocket_alpha = 0;
+        var rocket_y_dot = 0;
+        var field = [width * height];
+        var last_time = Date.now();
+        start_time = Date.now();
+        var start_time = 0;
+        var end_time = 0;
+
+        var text2 = document.createElement('div');
+        text2.style.position = 'absolute';
+        text2.style.top = 10 + 'px';
+        text2.style.left = 10 + 'px';
+        text2.style.width = 100;
+        text2.style.height = 200;
+        text2.style.fontSize = "12px";
+        text2.style.color = "#aaaaaa";
+        text2.style.backgroundColor = "#00000000";
+        text2.innerHTML = "1<br>2";
+        document.body.appendChild(text2);
+
+
+        function getox(x) {
+            return orgx + x * sqsize;
+        }
+        function getoy(y) {
+            return orgy + y * sqsize;
+        }
+        function getoy2(y) {
+            return orgy + (height - y - rocket_height) * sqsize;
+        }
+        function getfineoffsety() {
+            return sqsize * finey / resolution;
+        }
+
+        var eventq = 0;
+        document.addEventListener('keydown', function (event) {
+            eventq = event.keyCode;
+        });
+
+        // more tetris
+        var c_part = -1;
+        var next_part = -1;
+        var c_rot = 0;
+        var c_height = 1;
+        var color = [];
+        var c_index = [n_sq];
+        var c_preindex = [n_sq];
+        color[0] = 'rgb(255, 0, 0)';
+        color[1] = 'rgb(0, 255, 0)';
+        color[2] = 'rgb(0, 0, 255)';
+        color[3] = 'rgb(255, 255, 0)';
+        color[4] = 'rgb(0, 255, 255)';
+        color[5] = 'rgb(255, 0, 255)';
+        color[6] = 'rgb(128, 255, 0)';
+        color[7] = 'rgb(60,60,60)'; //'rgb(0, 128, 255)';
+        color[8] = 'rgb(128, 0, 255)';
+        var Tschioo = new Audio('Tschioo.mp3');
+        var Prrt = new Audio('Prrt.mp3');
+        var Bouff = new Audio('Bouff.mp3');
+        var Flick = new Audio('Flick.mp3');
+        var Swoosh = new Audio('Swoosh.mp3');
+        var Dioomm = new Audio('Dioomm.mp3');
+        var Tetris = new Audio('Korobeiniki.mp3');
+        Tetris.volume = .2;
+
+        function draw_field(ctx) {
+            // fill with background color
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.fillRect(0, 0, cwidth, cheight);
+            // draw board
+            for (i = 0; i < width * height; ++i) {
+                draw_box(ctx, i, n_part);
+            }
+            // text
+            ctx.fillStyle = 'red';
+            ctx.font = '48px georgia';
+            ctx.fillText('Height: ' + (parseInt(rocket_y * 10) / 10).toString() + ' m', getox(width + 0.5), getoy(1));
+            ctx.fillText('Time elapsed: ' + (end_time - start_time).toString() + " ms", getox(width + 0.5), getoy(2));
+            ctx.fillText(c_part.toString(), getox(width + 0.5), getoy(height - 0.2));
+            // text2
+            text2.innerHTML = "<h1>#"
+                + "<br>"
+                + "Height: " + parseInt(rocket_y * 10) / 10 + " m"
+                + "<br>"
+                + "Speed: " + parseInt(rocket_y_dot  * 10) / 10+ " m/s"
+                + "<br>"
+                + "Time elapsed: " + (end_time - start_time) + " ms"
+                + "<br>"
+                ;
+
+            // draw rocket
+            draw_rocket(ctx, c_index[0], c_part);
+        }
+        function init_new_part() {
+            finey = 0;
+            c_height = 2;
+            posx = width / 2;
+            highspeed = false;
+            if (next_part < 0) next_part = parseInt(Math.random() * n_part);
+            c_part = next_part;
+            next_part = next_part = parseInt(Math.random() * n_part);
+            c_rot = 0;
+            ++score;
+        }
+
+        const st_insertcoin = 0;
+        const st_playing = 1;
+        const st_gameover = 2;
+        var status = st_insertcoin;
+        function loop() {
+            const ctx = canvas.getContext('2d');
+            //console.log('status ' + status + ' event ' + eventq + ' c_part ' + c_part + ' c_height ' + c_height);
+            if (status == st_insertcoin) {
+                //process event:
+                switch (eventq) {
+                    case 32:
+                    case 13:
+                        //Tetris.play();
+                        last_time = Date.now();
+                        start_time = Date.now();
+                        status = st_playing;
+                        break;
+                }
+                eventq = 0;
+                // fill with background color
+                ctx.fillStyle = 'rgb(255, 255, 255)';
+                ctx.fillRect(0, 0, cwidth, cheight);
+                // text
+                ctx.fillStyle = 'blue';
+                ctx.font = '128px georgia';
+                ctx.fillText('TETRIS', getox(0), getoy(height / 2 - 2));
+                ctx.font = '48px georgia';
+                ctx.fillText('Press SPACE to start', getox(0), getoy(height / 2));
+            }
+            else if (status == st_gameover) {
+                //process event:
+                switch (eventq) {
+                    case 32:
+                    case 13:
+                        init();
+                        Flick.play();
+                        status = st_insertcoin;
+                        break;
+                }
+                eventq = 0;
+                // fill with background color
+                ctx.fillStyle = 'rgb(255, 255, 255)';
+                ctx.fillRect(0, 0, cwidth, cheight);
+                // draw
+                draw_field(ctx);
+                // text
+                ctx.fillStyle = 'red';
+                ctx.font = '64px georgia bold';
+                ctx.fillText('GAME OVER', getox(0), getoy(height / 2 - 2));
+                ctx.font = '48px georgia';
+                ctx.fillText('Press SPACE', getox(0), getoy(height / 2));
+            }
+            else if (status == st_playing) {
+                var time_elapsed = Date.now() - last_time;
+                last_time = Date.now();
+                end_time = Date.now();
+                //process event:
+                switch (eventq) {
+                    case 37:
+                        //left
+                        break;
+                    case 39:
+                        //right
+                        break;
+                    case 38:
+                        //up
+                        break;
+                    case 32:
+                        //space
+                        break;
+                }
+                eventq = 0;
+                // update rocket position
+                const G = 9.81; // m / s^2
+                rocket_y_dot -= G * time_elapsed / 1000;
+                console.log(end_time - start_time);
+                console.log(rocket_y);
+                console.log(rocket_y_dot);
+                rocket_y += rocket_y_dot * (time_elapsed / 1000);
+                if (rocket_y < 0) {
+                    rocket_y = 0;
+                    status = st_gameover;
+                    Dioomm.play();
+                }
+                // rotate
+                rocket_alpha += Math.PI / 100;
+                // draw
+                draw_field(ctx);
+            }
+            requestAnimationFrame(loop);
+        }
+        function draw_box(ctx, i, value) {
+            var x = i % width;
+            var y = parseInt(i / width);
+            // body
+            ctx.fillStyle = color[value];
+            ctx.fillRect(getox(x), getoy(y), sqsize, sqsize);
+            // border
+            ctx.strokeStyle = 'rgb(255, 255, 255)';
+            ctx.strokeRect(getox(x), getoy(y), sqsize, sqsize);
+        }
+        function draw_rocket(ctx, i, value) {
+            var x = i % width;
+            var y = parseInt(i / width);
+            //ctx.fillRect(getox(x), getoy2(rocket_y), sqsize, sqsize * rocket_height);
+            let rx = getox(x);
+            let ry = getoy2(rocket_y);
+            let rw = sqsize;
+            let rh = sqsize * rocket_height;
+
+            // Matrix transformation
+            ctx.translate(rx + rw / 2, ry + rh / 2);
+            ctx.rotate(rocket_alpha);
+            ctx.translate(-(rx + rw / 2), -(ry + rh / 2));
+
+            // Rotated rectangle
+            ctx.fillStyle = "red";
+            ctx.fillRect(rx, ry, rw, rh);
+            ctx.strokeStyle = 'rgb(255, 255, 255)';
+            ctx.strokeRect(rx, ry, rw, rh);
+            ctx.beginPath();
+            //ctx.ellipse(100, 100, 50, 75, Math.PI / 4, 0, 2 * Math.PI);
+            ctx.ellipse(rx+rw/2, ry+rh, rw/2, rh/2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Matrix back transformation
+            // Reset transformation matrix to the identity matrix
+            ctx.setTransform(1, 0, 0, 1, 0, 0, 0);        }
+
+        function init() {
+            rocket_y = 10;
+            rocket_y_dot = 0;
+            last_time = Date.now();
+            start_time = Date.now();
+            start_time = 0;
+            end_time = 0;
+        }
+
+
+        init();
+        loop();
+    </script>
+</body>
+</html>

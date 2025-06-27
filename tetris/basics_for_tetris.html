@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson1</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="myCanvas">
+        <p>Add suitable fallback here.</p>
+    </canvas>
+    <script>
+        const canvas = document.querySelector('.myCanvas');
+        const cwidth = canvas.width = window.innerWidth;
+        const cheight = canvas.height = window.innerHeight;
+        const szy = 5;
+        var posy = 0;
+        var posx = 0;
+        const resolution = 30;
+        var finey = 0;
+        var highspeed = false;
+        var part = [];
+        const width = 10;
+        const height = 20;
+        const n_part = 7;
+        const n_rot = 4;
+        const n_sq = 4;
+        const sqsize = parseInt(cheight / (height + 1));
+        const orgx = parseInt((cwidth - sqsize * width) / 2);
+        const orgy = sqsize / 2;
+        // I
+        part[0] = [];
+        part[0][0] = [-1, 0, 1, 2];
+        part[0][1] = [width, 0, -width, -2 * width]; // counter clockwise
+        part[0][2] = [-1, 0, 1, 2];
+        part[0][3] = [width, 0, -width, -2 * width]; // counter clockwise
+        // N
+        part[1] = [];
+        part[1][0] = [-1, 0, -width, -width + 1];
+        part[1][1] = [-width, 0, 1, width + 1];
+        part[1][2] = [-1, 0, -width, -width + 1];
+        part[1][3] = [-width, 0, 1, width + 1];
+        part[2] = []; // Z
+        part[2][0] = [-1, 0, width, width + 1];
+        part[2][1] = [-width, 0, -1, -1 + width];
+        part[2][2] = [-1, 0, width, width + 1];
+        part[2][3] = [-width, 0, -1, -1 + width];
+        part[3] = [] // Sq
+        part[3][0] = [0, 1, width, width + 1];
+        part[3][1] = [0, 1, width, width + 1];
+        part[3][2] = [0, 1, width, width + 1];
+        part[3][3] = [0, 1, width, width + 1];
+        part[4] = []; // L
+        part[4][0] = [-1, 0, 1, width - 1];
+        part[4][1] = [-width, 0, width, width + 1];
+        part[4][2] = [-1, 0, 1, -width + 1];
+        part[4][3] = [-width, 0, width, -width - 1];
+        part[5] = []; // inv L
+        part[5][0] = [-1, 0, 1, width + 1];
+        part[5][1] = [-width, 0, width, - width + 1];
+        part[5][2] = [-1, 0, 1, -width - 1];
+        part[5][3] = [-width, 0, width, +width - 1];
+        part[6] = []; // Y
+        part[6][0] = [-1, 0, 1, -width];
+        part[6][1] = [-width, 0, width, -1];
+        part[6][2] = [-1, 0, 1, width];
+        part[6][3] = [-width, 0, width, 1];
+        var field = [width * height];
+        function getox(x) {
+            return orgx + x * sqsize;
+        }
+        function getoy(y) {
+            return orgy + y * sqsize;
+        }
+        function getfineoffsety() {
+            return sqsize * finey / resolution;
+        }
+
+
+
+        function loopBasics() {
+            const ctx = canvas.getContext('2d');
+            // fill with background color
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.fillRect(0, 0, cwidth, cheight);
+            // increment
+            if (highspeed) {
+                finey = 0;
+                posy = posy + 1;
+                if (posy >= szy) {
+                    posy = 0;
+                    highspeed = false;
+                }
+            } else {
+                finey++;
+                if (finey > resolution) {
+                    finey = 0;
+                    posy = posy + 1;
+                    if (posy >= szy) {
+                        posy = 0;
+                    }
+                }
+            }
+            // body
+            ctx.fillStyle = 'rgb(255, 0, 0)';
+            ctx.fillRect(getox(posx), getoy(posy) + getfineoffsety(), sqsize, sqsize);
+            // border
+            ctx.strokeStyle = 'rgb(255, 255, 255)';
+            ctx.strokeRect(getox(posx), getoy(posy) + getfineoffsety(), sqsize, sqsize);
+            requestAnimationFrame(loopBasics);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.keyCode == 37) {
+                //left
+                posx = (posx + 5 - 1) % 5;
+            }
+            else if (event.keyCode == 39) {
+                //right
+                posx = (posx + 1) % 5;
+            }
+            else if (event.keyCode == 38) {
+                //up
+            }
+            else if (event.keyCode == 32) {
+                //space
+                highspeed = true;
+                c_part++;
+                if (c_part >= n_part) c_part = 0;
+                Swoosh.play();
+            }
+            else if (event.keyCode == 32) {
+                //space
+            }
+        });
+
+        // more tetris
+        var c_part = 0;
+        var c_rot = 0;
+        var color = [];
+        color[0] = 'rgb(255, 0, 0)';
+        color[1] = 'rgb(0, 255, 0)';
+        color[2] = 'rgb(0, 0, 255)';
+        color[3] = 'rgb(255, 255, 0)';
+        color[4] = 'rgb(0, 255, 255)';
+        color[5] = 'rgb(255, 0, 255)';
+        color[6] = 'rgb(128, 255, 0)';
+        color[7] = 'rgb(60,60,60)'; //'rgb(0, 128, 255)';
+        color[8] = 'rgb(128, 0, 255)';
+        var Tschioo = new Audio('Tschioo.wav');
+        var Prrt = new Audio('Prrt.wav');
+        var Bouff = new Audio('Bouff.wav');
+        var Flick = new Audio('Flick.wav');
+        var Swoosh = new Audio('Swoosh.wav');
+        function loop()
+        {
+            for (i = 0; i < width * height; ++i) {
+                field[i] = n_part;
+            }
+            for (rot = 0; rot < n_rot; ++rot) {
+                for (sq = 0; sq < n_sq; ++sq) {
+                    field[parseInt(4 * rot * width + 5 * width / 2) + part[c_part][rot][sq]] = c_part;
+                }
+                field[parseInt(4 * rot * width + 5 * width / 2) + part[c_part][rot][sq]] = n_part;
+            }
+            const ctx = canvas.getContext('2d');
+            // fill with background color
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.fillRect(0, 0, cwidth, cheight);
+            // increment
+            if (highspeed) {
+                finey = 0;
+                posy = posy + 1;
+                if (posy >= szy) {
+                    posy = 0;
+                    highspeed = false;
+                }
+            } else {
+                finey++;
+                if (finey > resolution) {
+                    finey = 0;
+                    posy = posy + 1;
+                    if (posy >= szy) {
+                        posy = 0;
+                    }
+                }
+            }
+            for (i = 0; i < width * height; ++i) {
+                var x = i % width;
+                var y = parseInt(i / width);
+                // body
+                /*
+                if (field[i]) {
+                    ctx.fillStyle = 'rgb(255, 255, 0)';
+                } else {
+                    ctx.fillStyle = 'rgb(60,60,60)';
+                }
+                */
+                ctx.fillStyle = color[field[i]];
+                ctx.fillRect(getox(x), getoy(y), sqsize, sqsize);
+                // border
+                ctx.strokeStyle = 'rgb(255, 255, 255)';
+                ctx.strokeRect(getox(x), getoy(y), sqsize, sqsize);
+            }
+            ctx.fillStyle = 'red';
+            ctx.font = '48px georgia';
+            ctx.fillText('0 Points', getox(width + 0.5), getoy(1));
+            ctx.fillText(c_part.toString(), getox(width + 0.5), getoy(height - 0.2));
+            requestAnimationFrame(loop);
+        }
+
+
+
+        loop();
+        /*
+
+ctx.strokeStyle = 'rgb(255, 255, 255)';
+ctx.strokeRect(25, 25, 175, 200);
+
+ctx.fillStyle = 'rgb(255, 255, 0)';
+ctx.beginPath();
+ctx.moveTo(50, 50);
+ctx.lineTo(150, 50);
+ctx.lineTo(150, 150);
+ctx.lineTo(100, 180);
+ctx.lineTo(50, 80);
+ctx.lineTo(50, 50);
+ctx.fill();
+
+
+ctx.strokeStyle = 'white';
+ctx.lineWidth = 1;
+ctx.font = '36px arial';
+ctx.strokeText('1Canvas text', 50, 50);
+
+ctx.fillStyle = 'red';
+ctx.font = '48px georgia';
+ctx.fillText('2Canvas text', 50, 150);
+*/
+    </script>
+</body>
+</html>

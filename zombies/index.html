@@ -1,0 +1,1644 @@
+<!doctype html>
+<html>
+<head>
+    <title>Sian's ZOMB!ES 2022</title>
+    <script type="text/javascript" src="Three.js"></script>
+    <script type="text/javascript" src="OrbitControls.js"></script>
+    <script src="howler.core.min.js"></script>
+    <script src="levels.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Georgia", serif;
+            color: #444;
+        }
+
+        canvas {
+            display: block; /* fix necessary to remove space at bottom of canvas */
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        // tickets:
+        // zombies can shoot
+        // zombies change color then suddenly can jump on you
+        // eggs from which zombies hatch
+        // introduce several weapons 1) Glock 17 2) H&K MP5
+        // multiple magazines in a level
+        // Zombies können nur einen 160 grad Winkel überblicken
+        // Effekte und Sound beim Wechsel in das nächste Level
+        // Hänsel und Gretel Steinchen
+        // erradicate this: myego_sphere.position.set(myego.position.x, myego.position.y, myego_sphere.position.z);
+        // replace "for (i" with "for (let i"
+        // stop play Invaders when all zombies are dead
+
+        var eventq = 0;
+        document.addEventListener('keydown', function (event) {
+            eventq = event.keyCode;
+        });
+
+        var pressedKeys = {};
+        window.onkeyup = function (e) {
+            pressedKeys[e.keyCode] = false;
+
+        }
+        window.onkeydown = function (e) {
+            pressedKeys[e.keyCode] = true;
+            pressedKeys[18] = false; // disable alt key
+        }
+
+
+        window.onload = function () {
+            var textH = document.createElement('div');
+            textH.style.position = 'absolute';
+            //textH.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+            textH.style.left = 0 + 'px';
+            textH.style.top = 0 + 'px';
+            textH.style.width = window.innerWidth + 'px';
+            textH.style.height = window.innerHeight + 'px';
+            textH.style.fontSize = "64px";
+            textH.style.backgroundColor = "white";
+            textH.innerHTML = "<h3 align=center> ZOMB!ES </h3><h3 align=center> Press ENTER to start</h3>";
+            document.body.appendChild(textH);
+
+            var text2 = document.createElement('div');
+            text2.style.position = 'absolute';
+            text2.style.top = 10 + 'px';
+            text2.style.left = 10 + 'px';
+            text2.style.width = 100;
+            text2.style.height = 200;
+            text2.style.fontSize = "12px";
+            text2.style.color = "#aaaaaa";
+            text2.style.backgroundColor = "#00000000";
+            text2.innerHTML = "";
+            document.body.appendChild(text2);
+            // ENTER 
+            var enterButton = document.createElement('button');
+            enterButton.style.position = "absolute";
+            enterButton.style.fontSize = "64px";
+            enterButton.innerHTML = "ENTER";
+            enterButton.style.left = parseInt((window.innerWidth - enterButton.offsetWidth) / 2) + 'px';
+            enterButton.style.top = parseInt(window.innerHeight * 2 / 3) + 'px';
+            document.body.appendChild(enterButton);
+            enterButton.onclick = function () {
+                eventq = 13;
+            }
+            // forward
+            var fwdButton = document.createElement('button');
+            fwdButton.style.position = "absolute";
+            fwdButton.style.fontSize = "64px";
+            fwdButton.innerHTML = "^";
+            fwdButton.style.left = parseInt((window.innerWidth / 4) / 2) + 'px';
+            fwdButton.style.top = parseInt(window.innerHeight * 24 / 32) + 'px';
+            document.body.appendChild(fwdButton);
+            fwdButton.ontouchstart = function () {
+                pressedKeys[38] = true;
+            }
+            fwdButton.ontouchend = function () {
+                pressedKeys[38] = false;
+            }
+            // backward
+            var bwdButton = document.createElement('button');
+            bwdButton.style.position = "absolute";
+            bwdButton.style.fontSize = "64px";
+            bwdButton.innerHTML = "v";
+            bwdButton.style.left = parseInt((window.innerWidth / 4) / 2) + 'px';
+            bwdButton.style.top = parseInt(window.innerHeight * 26 / 32) + 'px';
+            document.body.appendChild(bwdButton);
+            bwdButton.ontouchstart = function () {
+                pressedKeys[40] = true;
+            }
+            bwdButton.ontouchend = function () {
+                pressedKeys[40] = false;
+            }
+            // left
+            var leftButton = document.createElement('button');
+            leftButton.style.position = "absolute";
+            leftButton.style.fontSize = "64px";
+            leftButton.innerHTML = "<";
+            leftButton.style.left = parseInt(window.innerWidth * 2 / 32) + 'px';
+            leftButton.style.top = parseInt(window.innerHeight * 25 / 32) + 'px';
+            document.body.appendChild(leftButton);
+            leftButton.ontouchstart = function () {
+                pressedKeys[188] = true;
+            }
+            leftButton.ontouchend = function () {
+                pressedKeys[188] = false;
+            }
+            // right
+            var rightButton = document.createElement('button');
+            rightButton.style.position = "absolute";
+            rightButton.style.fontSize = "64px";
+            rightButton.innerHTML = ">";
+            rightButton.style.left = parseInt(window.innerWidth * 6 / 32) + 'px';
+            rightButton.style.top = parseInt(window.innerHeight * 25 / 32) + 'px';
+            document.body.appendChild(rightButton);
+            rightButton.ontouchstart = function () {
+                pressedKeys[190] = true;
+            }
+            rightButton.ontouchend = function () {
+                pressedKeys[190] = false;
+            }
+            // shoot
+            var shootButton = document.createElement('button');
+            shootButton.style.position = "absolute";
+            shootButton.style.fontSize = "64px";
+            shootButton.innerHTML = "SHOOT";
+            shootButton.style.left = parseInt(window.innerWidth * 9 / 32) + 'px';
+            shootButton.style.top = parseInt(window.innerHeight * 25 / 32) + 'px';
+            document.body.appendChild(shootButton);
+            shootButton.ontouchstart = function () {
+                pressedKeys[17] = true;
+            }
+            shootButton.ontouchend = function () {
+                pressedKeys[17] = false;
+            }
+            // open
+            var openButton = document.createElement('button');
+            openButton.style.position = "absolute";
+            openButton.style.fontSize = "64px";
+            openButton.innerHTML = "OPEN";
+            openButton.style.left = parseInt(window.innerWidth * 18 / 32) + 'px';
+            openButton.style.top = parseInt(window.innerHeight * 25 / 32) + 'px';
+            document.body.appendChild(openButton);
+            openButton.ontouchstart = function () {
+                pressedKeys[32] = true;
+            }
+            openButton.ontouchend = function () {
+                pressedKeys[32] = false;
+            }
+
+
+
+            var score = 0;
+
+            // Create the renderer and add it to the page's body element
+            var renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.shadowMap.enabled = true;
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Create the scene to hold the object
+            var scene = new THREE.Scene();
+
+            // Create the camera
+            var camera = new THREE.PerspectiveCamera(
+                55,                                     // Field of view
+                window.innerWidth / window.innerHeight, // Aspect ratio
+                0.1,                                    // Near plane distance
+                1000                                    // Far plane distance
+            );
+
+            // Add ambient light
+            ambientLight = new THREE.AmbientLight(0x777777);
+            scene.add(ambientLight);
+
+            // Create the time
+            var time_cnt = 0;
+
+            // Create the materials
+            const hecke_hoehe = 5;
+            // create the magazine
+            var mymagazine_x0 = 0;
+            var mymagazine_y0 = 0;
+            var mymagazine = new THREE.Mesh(new THREE.BoxGeometry(.4, .4, .4), new THREE.MeshStandardMaterial({ color: 0x006600 }));
+            mymagazine.name = "magazine";
+            scene.add(mymagazine);
+            // create firelight
+            var firelight = new THREE.PointLight(0xffff00, .4);
+            firelight.position.set(1, 1, -1);
+            firelight.visible = false;
+            scene.add(firelight);
+            // create transporter
+            var mytransporter = new THREE.Mesh(new THREE.SphereGeometry(1.5, 64, 32), new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 }));
+            scene.add(mytransporter);
+            // create the ego
+            var myego_angle = 0;
+            var myego_x0 = 0;
+            var myego_y0 = 4;
+            var myego_lookatx0 = 0;
+            var myego_lookaty0 = 0;
+            var myegogun = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, 1, 15), new THREE.MeshStandardMaterial({ color: 0x777777 }));
+            scene.add(myegogun);
+            const ego_radius = .5;
+            var myego = new THREE.Mesh(new THREE.SphereGeometry(ego_radius, 64, 32), new THREE.MeshBasicMaterial({ color: 0x000055 }));
+            myego.name = "ego";
+            scene.add(myego);
+            // turn ego using the mouse
+            var mouseX0;
+            var mouseY0;
+            const ms_none = 0;
+            const ms_down = 1;
+            const ms_driving = 2;
+            var mouseStatus = ms_none;
+            var mouseDeltaAngle = 0;
+            var mouseAngle0 = 0;
+            window.onmousedown = function (e) {
+                //alert("x=" + e.clientX + ", y=" + e.clientY);
+                mouseX0 = e.clientX;
+                mouseY0 = e.clientY;
+                mouseStatus = ms_down;
+                mouseAngle0 = myego_angle;
+                mouseDeltaAngle = 0;
+            }
+            window.onmouseup = function (e) {
+                pressedKeys[38] = false;
+                pressedKeys[40] = false;
+                mouseStatus = ms_none;
+            }
+            window.onmouseout = function (e) {
+                pressedKeys[38] = false;
+                pressedKeys[40] = false;
+                mouseStatus = ms_none;
+            }
+            window.onmousemove = function (e) {
+                switch (mouseStatus) {
+                    case ms_none:
+                        break;
+                    case ms_driving:
+                        if (e.clientY - mouseY0 < -20) {
+                            mouseDeltaAngle = 0; //-(2 * Math.PI * 10 / 360 * (e.clientX - mouseX0) / window.innerWidth);
+                            pressedKeys[38] = true;
+                        }
+                        else if (e.clientY - mouseY0 > 20) {
+                            pressedKeys[40] = true;
+                        } else {
+                            pressedKeys[38] = false;
+                            pressedKeys[40] = false;
+                            mouseStatus = ms_down;
+                        }
+                        break;
+                    case ms_down:
+                        mouseDeltaAngle = (2 * Math.PI * (e.clientX - mouseX0) / window.innerWidth);
+                        if (e.clientY - mouseY0 < -20) {
+                            mouseDeltaAngle = 0;
+                            mouseStatus = ms_driving;
+                        }
+                        else if (e.clientY - mouseY0 > 20) {
+                            mouseDeltaAngle = 0;
+                            mouseStatus = ms_driving;
+                        }
+                        break;
+                }
+            }
+            window.ontouchstart = function (e) {
+                mouseX0 = e.changedTouches[0].clientX;
+                mouseStatus = ms_down;
+                mouseAngle0 = myego_angle;
+                mouseDeltaAngle = 0;
+                //alert("touchstart " + mouseX0);
+            }
+            window.ontouchmove = function (e) {
+                switch (mouseStatus) {
+                    case ms_none:
+                        break;
+                    case ms_down:
+                        mouseDeltaAngle = (2 * Math.PI * (e.changedTouches[0].clientX - mouseX0) / window.innerWidth);
+                        //console.log(mouseDeltaAngle);
+                        break;
+                }
+            }
+            window.ontouchend = function (e) {
+                mouseStatus = ms_none;
+            }
+            // textures
+            var ceilingtexture = new THREE.TextureLoader().load('Ceiling.png');
+            ceilingtexture.wrapS = THREE.RepeatWrapping;
+            ceilingtexture.wrapT = THREE.RepeatWrapping;
+            var alientexture = new THREE.TextureLoader().load('alien.png');
+            alientexture.rotation = Math.PI / 2;
+            alientexture.center = new THREE.Vector2(0.5, 0.5); // center of texture.
+            var doortexture = new THREE.TextureLoader().load('dsDoor3.jpg');
+            var doortexture2 = new THREE.TextureLoader().load('dsDoor3.jpg');
+            var armortexture = new THREE.TextureLoader().load('Armor.png');
+            doortexture2.rotation = -Math.PI / 2;
+            doortexture2.center = new THREE.Vector2(0.5, 0.5); // center of texture.
+            var walltexture = new THREE.TextureLoader().load('BetonWall.png');
+            //var walltexture = new THREE.TextureLoader().load('WhiteWall.png');
+            // light of ego
+            var myegolight = new THREE.PointLight(0xffffff, 1, 0, 2);
+            myegolight.position.set(2, 5, 2);
+            //myego.add(myegolight);
+            // spotlight of ego
+            var myegospotlight = new THREE.SpotLight(0xffffff, .2);
+            myegospotlight.position.set(5, 5, 5);
+            myegospotlight.target = myego;
+            myegospotlight.castShadow = true; // default false
+            scene.add(myegospotlight);
+            const n_grid = 30;
+            const sz_grid = 5;
+            // create the lawn
+            var mylawn = new THREE.Mesh(new THREE.BoxGeometry(1, 1, .2), new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load('detentionblock.png') }));
+            mylawn.position.set(0, 0, -.1);
+            scene.add(mylawn);
+            // create the ceiling
+            var myceiling = new THREE.Mesh(new THREE.BoxGeometry(1, 1, .2), new THREE.MeshStandardMaterial({ map: ceilingtexture }));
+            myceiling.position.set(0, 0, hecke_hoehe + .1);
+            scene.add(myceiling);
+
+
+            var touchDevice = ('ontouchstart' in document.documentElement);
+            console.log("touchDevice=" + touchDevice);
+
+            function set_status(s) {
+                console.log("status=" + s);
+                status = s;
+            }
+
+            // create the Labyrinth
+            var labwalls = [];
+            var labdoors = [];
+            var labhealthdoses = [];
+            var labarmors = [];
+            var labpics = [];
+            var mylevel = 0;
+            //
+            function getcontent(x, y) {
+                try {
+                    return lab[mylevel].matrix[y * 2 + 1][x * 4 + 2];
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return ' ';
+            }
+            function getnumber(x, y) {
+                try {
+                    let c = lab[mylevel].matrix[y * 2 + 1][x * 4 + 3];
+                    if (c == ' ') return 0;
+                    return parseInt(c);
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return 0;
+            }
+            function whats_up(x, y) {
+                try {
+                    return lab[mylevel].matrix[y * 2][x * 4 + 2];
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return ' ';
+            }
+            function whats_up_ix(x, y) {
+                try {
+                    return lab[mylevel].matrix[y * 2][x * 4 + 3];
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return ' ';
+            }
+            function whats_left(x, y) {
+                try {
+                    return lab[mylevel].matrix[y * 2 + 1][x * 4];
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return ' ';
+            }
+            function whats_left_ix(x, y) {
+                try {
+                    return lab[mylevel].matrix[y * 2 + 1][x * 4 + 1];
+                }
+                catch (err) {
+                    return ' ';
+                }
+                return ' ';
+            }
+            var aliens_x0 = 0;
+            var aliens_y0 = 0;
+            var geo_wall_vert = new THREE.BoxGeometry(.2, sz_grid, hecke_hoehe);
+            var geo_image_vert = new THREE.BoxGeometry(.3, sz_grid / 2, hecke_hoehe / 2);
+            var geo_wall_horz = new THREE.BoxGeometry(sz_grid, .2, hecke_hoehe)
+            var geo_image_horz = new THREE.BoxGeometry(sz_grid / 2, .3, hecke_hoehe / 2)
+            var geo_doors_vert = new THREE.BoxGeometry(.1, sz_grid, hecke_hoehe);
+            var geo_doors_horz = new THREE.BoxGeometry(sz_grid, .1, hecke_hoehe);
+            var mat_doors_vert = new THREE.MeshBasicMaterial({ map: doortexture2, transparent: true, opacity: 0.9 });
+            var mat_doors_horz = new THREE.MeshStandardMaterial({ map: doortexture, transparent: true, opacity: 0.9 });
+            var mat_aliens = new THREE.MeshStandardMaterial({ map: alientexture });
+            var mat_deadaliens = new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load('Guts.png') });
+            var mat_windows = new THREE.MeshBasicMaterial({ color: 0x7777cc, transparent: true, opacity: 0.4 })
+            var mat_wall = new THREE.MeshStandardMaterial({ map: walltexture });
+            const doors_height_closed = hecke_hoehe / 2;
+            const doors_height_open = 3 * hecke_hoehe / 2;
+            var orglab_x = 0;//4;
+            var orglab_y = 0;//-7;
+            //
+            const sz_aliens = 1;
+            var aliens = [];
+            const al_livingdead = 0;
+            const al_dead = 1;
+            const al_petrified = 2;
+            const al_direct_view_to_ego = 3;
+            //
+            function build_lab() {
+                for (i of labwalls) {
+                    scene.remove(i);
+                }
+                labwalls = [];
+                for (i of labdoors) {
+                    scene.remove(i);
+                }
+                labdoors = [];
+                for (i of labhealthdoses) {
+                    scene.remove(i);
+                }
+                labhealthdoses = [];
+                for (i of labarmors) {
+                    scene.remove(i);
+                }
+                labarmors = [];
+                for (i of aliens) {
+                    scene.remove(i.object);
+                }
+                aliens = [];
+                for (i of labpics) {
+                    scene.remove(i);
+                }
+                labpics = [];
+                szlab_x = lab[mylevel].matrix[0].length / 4;
+                szlab_y = lab[mylevel].matrix.length / 2;
+                mytransporter.visible = false;
+                for (i = 0; i < szlab_x; ++i) {
+                    for (j = 0; j < szlab_y; ++j) {
+                        // left
+                        let chleft = whats_left(i, j);
+                        let chleftix = whats_left_ix(i, j);
+                        if ("pP+|".includes(chleft)) {
+                            var tmp = new THREE.Mesh(geo_wall_vert, mat_wall);
+                            tmp.name = "wall";
+                            tmp.position.set((orglab_x - i + .5) * sz_grid, (orglab_y + j) * sz_grid, hecke_hoehe / 2);
+                            tmp.castShadow = true; // default is false
+                            tmp.receiveShadow = true; // default is false                     
+                            scene.add(tmp);
+                            labwalls.push(tmp);
+                            if ('pP'.includes(chleft) && !('- |+'.includes(chleftix))) {
+                                const loader = new THREE.TextureLoader();
+                                let rtexture = loader.load(images[chleftix]);
+                                rtexture.center = new THREE.Vector2(0.5, 0.5);
+                                rtexture.rotation = Math.PI / 2;
+                                let ltexture = loader.load(images[chleftix]);
+                                ltexture.center = new THREE.Vector2(0.5, 0.5);
+                                ltexture.rotation = -Math.PI / 2;
+                                const cubeMaterials = [
+                                    new THREE.MeshStandardMaterial({ map: rtexture }), //top side
+                                    new THREE.MeshStandardMaterial({ map: ltexture }), //bottom side
+                                    undefined, undefined, undefined, undefined,
+                                    /*
+                                    new THREE.MeshBasicMaterial({ map: rtexture }), //top side
+                                    new THREE.MeshBasicMaterial({ map: loader.load(images[chleftix]) }), //bottom side
+                                    new THREE.MeshBasicMaterial({ map: rtexture }), //top side
+                                    new THREE.MeshBasicMaterial({ map: loader.load(images[chleftix]) }), //bottom side
+                                    */
+                                ];
+                                var tmp2 = new THREE.Mesh(geo_image_vert, cubeMaterials);
+                                tmp2.position.set((orglab_x - i + .5) * sz_grid, (orglab_y + j) * sz_grid, hecke_hoehe / 2);
+                                scene.add(tmp2);
+                                labpics.push(tmp2);
+                            }
+                        }
+                        else if ('Dd'.includes(whats_left(i, j))) {
+                            var tmp = new THREE.Mesh(geo_doors_vert, mat_doors_vert);
+                            tmp.name = "door";
+                            tmp.position.set((orglab_x - i + .5) * sz_grid, (orglab_y + j) * sz_grid, doors_height_closed);
+                            scene.add(tmp);
+                            labdoors.push(tmp);
+                        }
+                        else if ('Ww'.includes(whats_left(i, j))) {
+                            var tmp = new THREE.Mesh(geo_doors_vert, mat_windows);
+                            tmp.name = "window";
+                            tmp.position.set((orglab_x - i + .5) * sz_grid, (orglab_y + j) * sz_grid, doors_height_closed);
+                            scene.add(tmp);
+                            labwalls.push(tmp);
+                        }
+                        else {
+                            var tmp = 1;
+                        }
+                        // up
+                        let chup = whats_up(i, j);
+                        let chupix = whats_up_ix(i, j);
+                        if ('pP-'.includes(chup)) {
+                            var tmp = new THREE.Mesh(geo_wall_horz, mat_wall);
+                            tmp.name = "wall";
+                            tmp.position.set((orglab_x - i) * sz_grid, (orglab_y + j - .5) * sz_grid, hecke_hoehe / 2);
+                            tmp.castShadow = true; // default is false
+                            tmp.receiveShadow = true; // default is false                     
+                            scene.add(tmp);
+                            labwalls.push(tmp);
+                            if ('pP'.includes(chup) && !('- |+'.includes(chupix))) {
+                                const loader = new THREE.TextureLoader();
+                                let rtexture = loader.load(images[chupix]);
+                                rtexture.center = new THREE.Vector2(0.5, 0.5);
+                                rtexture.rotation = Math.PI;
+                                const cubeMaterials = [
+                                    undefined, undefined,
+                                    /*
+                                    new THREE.MeshBasicMaterial({ map: loader.load('alien.png') }), //right side
+                                    new THREE.MeshBasicMaterial({ map: loader.load('alien.png') }), //left side
+                                    */
+                                    new THREE.MeshStandardMaterial({ map: rtexture }), //top side
+                                    new THREE.MeshStandardMaterial({ map: loader.load(images[chupix]) }), //bottom side
+                                    undefined, undefined,
+                                    /*
+                                    new THREE.MeshBasicMaterial({ map: loader.load(images[chupix]) }), //front side
+                                    new THREE.MeshBasicMaterial({ map: loader.load(images[chupix]) }), //back side
+                                    */
+                                ];
+                                //var tmp2 = new THREE.Mesh(geo_image_horz, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, map: new THREE.TextureLoader().load(images[chupix]) }));
+                                var tmp2 = new THREE.Mesh(geo_image_horz, cubeMaterials);
+                                tmp2.position.set((orglab_x - i) * sz_grid, (orglab_y + j - .5) * sz_grid, hecke_hoehe / 2);
+                                scene.add(tmp2);
+                                labpics.push(tmp2);
+                            }
+                        }
+                        else if ('Dd'.includes(chup)) {
+                            var tmp = new THREE.Mesh(geo_doors_horz, mat_doors_horz);
+                            tmp.name = "door";
+                            tmp.position.set((orglab_x - i) * sz_grid, (orglab_y + j - .5) * sz_grid, doors_height_closed);
+                            scene.add(tmp);
+                            labdoors.push(tmp);
+                        }
+                        else if ('Ww'.includes(chup)) {
+                            var tmp = new THREE.Mesh(geo_doors_horz, mat_windows);
+                            tmp.position.set((orglab_x - i) * sz_grid, (orglab_y + j - .5) * sz_grid, doors_height_closed);
+                            tmp.name = 'window';
+                            scene.add(tmp);
+                            labwalls.push(tmp);
+                        }
+                        else {
+                            var tmp = 1;
+                        }
+                        // content
+                        //console.log(content="'" + getcontent(i, j) +  "'");
+                        if (getcontent(i, j) == 'E') {
+                            myego_x0 = -i + orglab_x;
+                            myego_y0 = j + orglab_y;
+                        }
+                        else if ('Mm'.includes(getcontent(i, j))) {
+                            mymagazine_x0 = -i + orglab_x;
+                            mymagazine_y0 = j + orglab_y;
+                        }
+                        else if ('Zz'.includes(getcontent(i, j))) {
+                            aliens_x0 = -i + orglab_x;
+                            aliens_y0 = j + orglab_y;
+                            let n = getnumber(i, j);
+                            if (n <= 0) n = 1;
+                            //
+                            for (let k = 0; k < n; ++k) {
+                                var tmp = new THREE.Mesh(new THREE.BoxGeometry(sz_aliens, sz_aliens, 2), mat_aliens);
+                                tmp.position.set(aliens_x0 * sz_grid + k % 3 - 1, aliens_y0 * sz_grid + parseInt(k / 3) - 1, 1);
+                                tmp.castShadow = true; // default is false
+                                tmp.name = 'alien';
+                                scene.add(tmp);
+                                aliens.push({ status: al_livingdead, object: tmp, angle: Math.random() * 2 * Math.PI, nextmoan: 0, });
+                                //console.log(aliens[0]);
+                            }
+                        }
+                        else if (getcontent(i, j) == 'L') {
+                            myego_lookatx0 = -i + orglab_x;
+                            myego_lookaty0 = j + orglab_y;
+                        }
+                        else if (getcontent(i, j) == 'T') {
+                            mytransporter.visible = true;
+                            mytransporter.name = "transporter";
+                            mytransporter.position.set((orglab_x - i) * sz_grid, (orglab_y + j) * sz_grid, 1);
+                        }
+                        else if (getcontent(i, j) == 'H') {
+                            var geometry = new THREE.SphereGeometry(.3, 64, 32)
+                            geometry.applyMatrix(new THREE.Matrix4().makeScale(1, 1, 2));
+                            var tmp = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x3333ff, }));
+                            tmp.name = "health";
+                            tmp.position.set((orglab_x - i) * sz_grid, (orglab_y + j) * sz_grid, 1);
+                            scene.add(tmp);
+                            labhealthdoses.push(tmp);
+                        }
+                        else if (getcontent(i, j) == 'A') {
+                            var geometry = new THREE.SphereGeometry(.3, 64, 32)
+                            geometry.applyMatrix(new THREE.Matrix4().makeScale(.5, 2, 2));
+                            var tmp = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: armortexture, }));
+                            tmp.name = "armor";
+                            tmp.castShadow = true; // default is false
+                            tmp.receiveShadow = false; // default is false                     
+                            tmp.rotation.z = Math.PI / 4;
+                            tmp.position.set((orglab_x - i) * sz_grid, (orglab_y + j) * sz_grid, 1);
+                            scene.add(tmp);
+                            labarmors.push(tmp);
+                        }
+                    }
+                }
+                {
+                    // lawn and ceiling
+                    let b1 = new THREE.Box3();
+                    for (i of labwalls) {
+                        b1.expandByObject(i);
+                    }
+                    mylawn.scale.set(2 * sz_grid + b1.getSize().x, 2 * sz_grid + b1.getSize().y, 1);
+                    mylawn.position.set(b1.getCenter().x, b1.getCenter().y, -.1);
+                    myceiling.scale.set(1 * sz_grid + b1.getSize().x, 1 * sz_grid + b1.getSize().y, 1);
+                    myceiling.position.set(b1.getCenter().x, b1.getCenter().y, hecke_hoehe + .1);
+                }
+            }
+
+            function get_distance_to_wall(mypos, mydir, hard = true) {
+                const myradius = .5;
+                dw1 = get_distance_to_wall_0(mypos, mydir, hard);
+                let myleft = mypos.clone();
+                myleft.x += myradius * mydir.y;
+                myleft.y -= myradius * mydir.x;
+                dw2 = get_distance_to_wall_0(myleft, mydir, hard);
+                let myright = mypos.clone();
+                myright.x -= myradius * mydir.y;
+                myright.y += myradius * mydir.x;
+                dw3 = get_distance_to_wall_0(myright, mydir, hard);
+                if (dw2 < dw1) dw1 = dw2;
+                if (dw3 < dw1) dw1 = dw3;
+                return dw1;
+            }
+
+            function get_distance_to_wall_0(mypos, mydir, hard) {
+                var r = new THREE.Raycaster(mypos, mydir);
+                let md = 1000000000;
+                for (let i of labwalls) {
+                    if (!hard && i.name == 'window') continue;
+                    if (i.visible) {
+                        let iresult = r.intersectObject(i);
+                        if (iresult.length) {
+                            if (iresult[0].distance < md) md = iresult[0].distance;
+                        }
+                    }
+                }
+                for (let i of labdoors) {
+                    if (i.visible) {
+                        let iresult = r.intersectObject(i);
+                        if (iresult.length) {
+                            if (iresult[0].distance < md) md = iresult[0].distance;
+                        }
+                    }
+                }
+                return md;
+            }
+
+            function init_game() {
+                console.log("init_game()");
+                build_lab();
+                myego.rotation.x = 0;
+                myego.rotation.y = 0;
+                myego_angle = Math.PI;
+                myego_angle = Math.atan2(myego_lookaty0 - myego_y0, myego_lookatx0 - myego_x0);
+                myego.position.set(sz_grid * myego_x0, sz_grid * myego_y0, .5);
+                mymagazine.visible = true;
+                mymagazine.position.set(mymagazine_x0 * sz_grid, mymagazine_y0 * sz_grid, .5);
+                //Invaders.play();
+                render_game();
+            }
+
+            // load audio
+            var Level = new Howl({ src: ['InvadersTitle.mp3'] });
+            var HTschioo = new Howl({ src: ['Tschioo.mp3'] });
+            var HAua = new Howl({ src: ['Aua.mp3'] });
+            var HAah = new Howl({ src: ['Aah.mp3'] });
+            var HZipper = new Howl({ src: ['Zipper.mp3'] });
+            var Prrt = new Audio('Prrt.mp3');
+            var HBouff = new Howl({ src: ['Bouff.mp3'] });
+            var AlienCollides = new Howl({ src: ['AlienCollides.mp3'], volume: 0.3 });
+            var Swoosh = new Audio('Swoosh.mp3');
+            var Dioomm = new Audio('Dioomm.mp3');
+            var Sterben = new Audio('Sterben.mp3');
+            var EgoDying = new Audio('Ego Dying.mp3');
+            var Invaders = new Audio('Invaders.mp3');
+            var Durchladen = new Audio('Durchladen.mp3');
+            var EmptyClick = new Audio('EmptyClick.mp3');
+            var DoorOpen = new Audio('DoorOpen.mp3');
+            var DoorStop = new Audio('DoorStop.mp3');
+            Invaders.volume = 0.2;
+            Invaders.loop = true;
+            var Moan = [];
+            Moan.push(new Howl({ src: ['Moan1.mp3'] }));
+            Moan.push(new Howl({ src: ['Moan2.mp3'] }));
+            Moan.push(new Howl({ src: ['Moan3.mp3'] }));
+            Moan.push(new Howl({ src: ['Moan4.mp3'] }));
+            Moan.push(new Howl({ src: ['Moan5.mp3'] }));
+            Moan.push(new Howl({ src: ['Moan6.mp3'] }));
+            var ZombieEating = new Audio('Zombie Eating.mp3');
+            ZombieEating.loop = true;
+            var SeeYa = new Howl({ src: ['SeeYa.mp3'] });
+            //var SeeYa = new Audio('SeeYa.mp3');
+            var myego_direction = new THREE.Vector3(0, 0, 0);
+
+
+            // bullets
+            const max_bullet_in_magazine = 17;  // capacity of the Glock 19
+            const bs_none = 0;
+            const bs_inshoot = 1;
+            class bullet_class {
+                constructor() {
+                    this.status = bs_none;
+                    this.angle = 0;
+                    this.x = 0;
+                    this.object = undefined;
+                }
+            }
+            const n_bullet = max_bullet_in_magazine;
+            var bullet = [];
+            for (i = 0; i < n_bullet; ++i) {
+                bullet[i] = new bullet_class();
+                bullet[i].object = new THREE.Mesh(new THREE.SphereGeometry(.2), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+                bullet[i].object.visible = false;
+                scene.add(bullet[i].object);
+                bullet[i].fireball = new THREE.Mesh(new THREE.SphereGeometry(.1), new THREE.MeshBasicMaterial({ color: 0xff8800, transparent: true, opacity: 0.7 }));
+                bullet[i].fireball.visible = false;
+                scene.add(bullet[i].fireball);
+            }
+            var bullets_ingun = 0;
+            var bullets_onhold = 0;
+
+            // ego status
+            const st_insertcoin = 0;
+            const st_play = 1;
+            const st_gameover = 2;
+            const st_title = 3;
+            var status = st_insertcoin;
+            var status_health = 80;  // [0, 100] 0 = tot, 100 = kerngesund
+            var status_armor = 0; // [0, 100] 0 = kein Schutz, 100 = unverwundbar
+
+            // check collision
+            var collision_index = -1;
+            var collision_reason = -1;
+            var collision_object = undefined;
+            const cr_magazine = 1;
+            const cr_ego = 2;
+            const cr_labwalls = 3;
+            const cr_aliens = 4;
+            const cr_transporter = 5;
+            const cr_labdoors = 6;
+            const cr_healthdose = 7;
+            const cr_armors = 8;
+            const cr_labwindows = 9;
+            function   thereis_collision (pos0, pos1, a_object, alien_i, check_ego) {
+                return thereis_collision2("-", pos0, pos1, a_object, alien_i, check_ego);
+                collision_reason = -1;
+                collision_object = undefined;
+                collision_index = -1;
+                if (check_ego) {
+                    let b1 = new THREE.Box3();
+                    b1.setFromObject(myego);
+                    let b2 = new THREE.Box3();
+                    b2.setFromObject(a_object);
+                    b2.intersect(b1);
+                    if (!b2.isEmpty()) {
+                        collision_reason = cr_ego;
+                        return true;
+                    }
+                }
+                for (let j of labwalls) {
+                    if (!j.visible) continue;
+                    let b1 = new THREE.Box3();
+                    b1.setFromObject(j);
+                    let b2 = new THREE.Box3();
+                    b2.setFromObject(a_object);
+                    b2.intersect(b1);
+                    if (!b2.isEmpty()) {
+                        collision_reason = cr_labwalls;
+                        collision_object = j;
+                        return true;
+                    }
+                }
+                for (let j of labdoors) {
+                    let b1 = new THREE.Box3();
+                    b1.setFromObject(j);
+                    let b2 = new THREE.Box3();
+                    b2.setFromObject(a_object);
+                    b2.intersect(b1);
+                    if (!b2.isEmpty()) {
+                        collision_reason = cr_labdoors;
+                        collision_object = j;
+                        return true;
+                    }
+                }
+                for (let j = 0; j < aliens.length; ++j) {
+                    if (alien_i == j) continue;
+                    if (!aliens[j].object.visible) continue;
+                    let b1 = new THREE.Box3();
+                    b1.setFromObject(aliens[j].object);
+                    let b2 = new THREE.Box3();
+                    b2.setFromObject(a_object);
+                    b2.intersect(b1);
+                    if (!b2.isEmpty()) {
+                        collision_index = j;
+                        collision_object = aliens[j].object;
+                        collision_reason = cr_aliens;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            function thereis_collision2(text, pos0, pos1, a_object, alien_i, check_ego, check_window = true) {
+                //console.log("thereis_collision2(" + text + ", " + a_object.name + ")");
+                collision_reason = -1;
+                collision_object = undefined;
+                collision_index = -1;
+                let range = pos0.distanceTo(pos1);
+                let direction = pos1.clone();
+                direction.sub(pos0);
+                direction.normalize();
+                direction.z = 0;
+                const n_rays = 11;
+                let r = [];
+                const mytext = "direct view to egoxxxxx"
+                if (text == mytext) {
+                    let obj = undefined;
+                    do {
+                        obj = scene.getObjectByName("line");
+                        if (obj != undefined) {
+                            scene.remove(obj);
+
+                        }
+                    } while (obj != undefined)
+                }
+                for (let i = 0; i < n_rays; ++i) {
+                    let offset = i / (n_rays - 1) * 2 - 1;
+                    let rayorg = pos0.clone();
+                    rayorg.x += ego_radius * offset * -direction.y;
+                    rayorg.y += ego_radius * offset * direction.x;
+                    rayorg.z = .5;
+                    let rayorg2 = rayorg.clone();
+                    rayorg2.add(direction);
+                    rayorg2.add(direction);
+                    let direction2 = direction.clone();
+                    direction2.x = - direction2.x;
+                    direction2.y = - direction2.y;
+                    let rc2 = new THREE.Raycaster(rayorg2, direction2);
+                    let iresult = rc2.intersectObject(a_object);
+                    let dd2 = 0;
+                    if (iresult.length) {
+                        rayorg2.x += direction2.x * iresult[0].distance;
+                        rayorg2.y += direction2.y * iresult[0].distance;
+                        rayorg.copy(rayorg2);
+                    }
+                    let elm = { rc: new THREE.Raycaster(rayorg, direction), dd: ego_radius * (1 - Math.sin(Math.acos(offset))) };
+                    elm.dd = .6 * ego_radius * Math.abs(offset)
+                    r.push(elm);
+                    elm.dd = dd2;
+                    if (text == mytext) {
+                        const material = new THREE.LineBasicMaterial({ color: 0xffff00 });
+                        let points = [];
+                        points.push(rayorg);
+                        points.push(new THREE.Vector3(rayorg.x + range * direction.x, rayorg.y + range * direction.y, rayorg.z));
+                        points.push(new THREE.Vector3(rayorg.x + range * direction.x, rayorg.y + range * direction.y, rayorg.z + 3));
+                        let geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        let line = new THREE.Line(geometry, material);
+                        line.name = "line";
+                        scene.add(line);
+                    }
+                }
+                let md = 1000000000;
+                let dw = [];
+                function checkobject(i, ix = -1) {
+                    if (i.visible) {
+                        for (let ray of r) {
+                            let iresult = ray.rc.intersectObject(i);
+                            if (iresult.length) {
+                                if (i.name == "health") {
+                                }
+                                dw.push({ distance: iresult[0].distance + ray.dd, object: i, index: ix });
+                            }
+                        }
+                    }
+                }
+                for (let i of labwalls) {
+                    if (i.name == "window" && !check_window) continue;
+                    checkobject(i)
+                }
+                for (let i of labdoors) {
+                    checkobject(i)
+                }
+                if (check_ego) {
+                    checkobject(myego);
+                }
+                //checkobject(mytransporter);
+                //checkobject(mymagazine);
+                for (let i of labhealthdoses) {
+                    checkobject(i)
+                }
+                for (let i of labarmors) {
+                    checkobject(i)
+                }
+                for (let j = 0; j < aliens.length; ++j) {
+                    if (alien_i == j) continue;
+                    if (!aliens[j].object.visible) continue;
+                    checkobject(aliens[j].object, j);
+                }
+                dw.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+                let result = false;
+                //if (text == mytext) console.log("range=" + range)
+                for (let i of dw) {
+                    let object_in_range = (i.distance < range);
+                    if (object_in_range) {
+                        result = true;
+                    }
+                }
+                if (dw.length) {
+                    collision_object = dw[0].object;
+                    collision_index = dw[0].index;
+                }
+                return result;
+            }
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Begin the animation
+            //
+
+            animate();
+
+            function render_game() {
+                text2.innerHTML = "<h1>#"
+                    + (mylevel + 1) + ' "'
+                    + lab[mylevel].title + '"'
+                    + "<br>"
+                    + "Score: " + score
+                    + "<br>"
+                    + "Bullets: " + bullets_ingun
+                    + "<br>"
+                    + "Health: " + parseInt(status_health) + "%"
+                    + "<br>"
+                    + "Armor: " + parseInt(status_armor) + "%"
+                    + "</h1>"
+                    + "<br><pre>"
+                    + "Keys:<br>"
+                    + "->          turn right<br>"
+                    + "<-          turn left<br>"
+                    + "up arrow    move forward<br>"
+                    + "down arrow  move backward<br>"
+                    + ",           strafe left<br>"
+                    + ".           strafe right<br>"
+                    + "CTRL        shoot<br>"
+                    + "SPACE       open door<br>"
+                    + "O           lift up camera (kibitz)<br>"
+
+                    + "<pre>"
+                    ;
+                // Update the orbit controls
+                camera.updateProjectionMatrix();
+                // Render the frame
+                renderer.render(scene, camera);
+
+            }
+
+            var damage_onhold = 0;
+            const alien_speed = 4; // unit is m/sec...1m is 1 unit in THREE.js coordinate system
+            const alien_attack_speed = 6; // unit is m/sec...1m is 1 unit in THREE.js coordinate system
+            function process_aliens() {
+                // aliens movements
+                let sum_distance = 0;
+                let n_distance = 0;
+                let direct_view_flag = false;
+                for (let i = 0; i < aliens.length; ++i) {
+                    if (aliens[i].status == al_dead) {
+                        continue;
+                    }
+                    else if (aliens[i].status == al_petrified) {
+                        if (Date.now() > aliens[i].t0 + 700) {
+                            aliens[i].status = al_livingdead;
+                        }
+                        n_distance++;
+                        let dego = myego.position.distanceTo(aliens[i].object.position);
+                        sum_distance += dego;
+                    }
+                    else if (aliens[i].status == al_direct_view_to_ego) {
+                        direct_view_flag = true;
+                        let dir2ego = myego.position.clone();
+                        dir2ego.sub(aliens[i].object.position);
+                        dir2ego.normalize();
+                        aliens[i].angle = Math.atan2(dir2ego.y, dir2ego.x);
+                        // make backup x
+                        let backup_position = aliens[i].object.position.clone();
+                        let backup_angle = aliens[i].angle;
+                        // move x
+                        aliens[i].object.position.x += alien_attack_speed * time_elapsed / 1000 * dir2ego.x;
+                        // check collision x
+                        if (thereis_collision2("1037", backup_position, aliens[i].object.position, aliens[i].object, i, true)) {
+                            // restore backup
+                            aliens[i].object.position.set(backup_position.x, backup_position.y, backup_position.z)
+                            aliens[i].angle = backup_angle;
+                        }
+                        // make backup y
+                        backup_position = aliens[i].object.position.clone();
+                        backup_angle = aliens[i].angle;
+                        // move y
+                        aliens[i].object.position.y += alien_attack_speed * time_elapsed / 1000 * dir2ego.y;
+                        // check collision y
+                        if (thereis_collision2("1037", backup_position, aliens[i].object.position, aliens[i].object, i, true)) {
+                            // restore backup
+                            aliens[i].object.position.set(backup_position.x, backup_position.y, backup_position.z)
+                            aliens[i].angle = backup_angle;
+                        }
+                        // check egohit
+                        if (aliens[i].object.position.distanceTo(myego.position) < 1.2) {
+                            if (status == st_play && damage_onhold < Date.now()) {
+                                let damage = 20;
+                                damage *= (100 - status_armor) / 100;
+                                status_health -= damage;
+                                HAua.play();
+                                damage_onhold = Date.now() + 800;
+                                if (status_health <= 0) {
+                                    status_health = 0;
+                                    set_status(st_gameover);
+                                    myego.rotation.y = 1;
+                                    myego.rotation.x = 1;
+                                    EgoDying.play();
+                                    ZombieEating.play();
+                                    Invaders.pause();
+                                }
+                            }
+                        }
+                        // check if we can see the ego
+                        if (thereis_collision2("direct view to ego", aliens[i].object.position, myego.position, aliens[i].object, i, true, false) && collision_object.name != "ego") {
+                            aliens[i].status = al_livingdead;
+                        }
+                    }
+                    else if (aliens[i].status == al_livingdead) {
+                        if (aliens[i].object.visible) {
+                            //aliens[i].angle = Math.PI / 4;
+                            function get_new_direction(a) {
+                                let improved_point = a.object.position.clone();
+                                let dw = [];
+                                for (let probe_angle = 0; probe_angle < 2 * Math.PI; probe_angle += 2 * Math.PI / 13) {
+                                    let probedir = new THREE.Vector3();
+                                    calc_cartesian(probedir, probe_angle);
+                                    let d = get_distance_to_wall(improved_point, probedir, true);
+                                    if (d > 2) {
+                                        dw.push({ angle: probe_angle, distance: d });
+                                    }
+                                }
+                                if (dw.length > 0) {
+                                    let choice = parseInt(dw.length * Math.random())
+                                    return dw[choice].angle;
+                                }
+                                alert("deadlock");
+                                return 0;
+                            }
+                            if (aliens[i].nextmoan < Date.now()) {
+                                if (aliens[i].nextmoan != 0) {
+                                    let dego = myego.position.distanceTo(aliens[i].object.position);
+                                    let moaningvolume = 5 / dego;
+                                    if (moaningvolume < 0) moaningvolume = 0;
+                                    if (moaningvolume >= 1) moaningvolume = 1;
+                                    let m = parseInt(Math.random() * Moan.length);
+                                    Moan[m].volume(moaningvolume);
+                                    Moan[m].play();
+                                    //console.log(aliens[i].nextmoan + ", Moan[" + m + "].play();");
+                                }
+                                aliens[i].nextmoan = Date.now() + parseInt(Math.random() * 8 + 4) * 1000;
+                            }
+                            // check if we can see the ego
+                            if (thereis_collision2("direct view to ego", aliens[i].object.position, myego.position, aliens[i].object, i, true, false) && collision_object.name == 'ego') {
+                                aliens[i].status = al_direct_view_to_ego;
+                            }
+                            else {
+                                let alien_direction = new THREE.Vector3();
+                                calc_cartesian(alien_direction, aliens[i].angle);
+                                // make backup
+                                let backup_position = aliens[i].object.position.clone();
+                                let backup_angle = aliens[i].angle;
+                                // move
+                                aliens[i].object.position.x += alien_speed * time_elapsed / 1000 * alien_direction.x;
+                                aliens[i].object.position.y += alien_speed * time_elapsed / 1000 * alien_direction.y;
+                                // check collision
+                                if (thereis_collision2("1037", backup_position, aliens[i].object.position, aliens[i].object, i, true)) {
+                                    let d = aliens[i].object.position.distanceTo(myego.position);
+                                    AlienCollides.volume(5 / d);
+                                    AlienCollides.play();
+                                    //console.log("AlienCollides.play();");
+                                    // restore backup
+                                    aliens[i].object.position.set(backup_position.x, backup_position.y, backup_position.z)
+                                    aliens[i].angle = backup_angle;
+                                    // choose new direction
+                                    aliens[i].angle = get_new_direction(aliens[i]);
+                                    aliens[i].status = al_petrified;
+                                    aliens[i].t0 = Date.now();
+                                } else {
+                                }
+                            }
+                        }
+                    }
+                }
+                if (direct_view_flag) {
+                    if (!SeeYa.playing()) SeeYa.play();
+                    //console.log("SeeYa.play();");
+                }
+                else {
+                    SeeYa.pause();
+                    //console.log("SeeYa.pause();");
+                }
+                /*
+                let moaningvolume = 0;
+                if (n_distance > 0) {
+                    avg_distance = sum_distance / n_distance
+                    moaningvolume = 5 / avg_distance; // / avg_distance;
+                    if (moaningvolume < 0) moaningvolume = 0;
+                    if (moaningvolume >= 1) moaningvolume = 1;
+                } else {
+                    Invaders.pause();
+                }
+                */
+            }
+
+            //
+            const ds_none = 0;
+            const ds_opening = 1;
+            const ds_closing = 2;
+            var doors_status = ds_none;
+            var doors_object = undefined;
+            var doors_progress = 0;  // goes from 0 to 100
+            function process_doors() {
+                let egoposxy = myego.position.clone();
+                if (doors_status == ds_none) {
+                    if (pressedKeys[32]) {
+                        let nearest_door = undefined;
+                        let nearest_distance = 2 * sz_grid;
+                        for (let j of labdoors) {
+                            egoposxy.z = j.position.z;
+                            let d = j.position.distanceTo(egoposxy);
+                            if (d < nearest_distance) {
+                                nearest_distance = d;
+                                nearest_door = j;
+                            }
+                        }
+                        if (nearest_door != undefined && nearest_distance < 2 * sz_grid) {
+                            // found a door
+                            if (nearest_door.position.z == doors_height_closed) {
+                                doors_status = ds_opening;
+                                doors_object = nearest_door;
+                                doors_progress = 0;
+                                DoorOpen.play();
+                            }
+                            else if (nearest_door.position.z == doors_height_open) {
+                                doors_status = ds_closing;
+                                doors_object = nearest_door;
+                                doors_progress = 0;
+                                DoorOpen.play();
+                            }
+                        }
+                    }
+
+                }
+                else if (doors_status == ds_opening) {
+                    doors_progress++;
+                    doors_object.position.z = doors_height_closed + (doors_height_open - doors_height_closed) * doors_progress / 100;
+                    if (doors_progress >= 100) {
+                        DoorOpen.pause();
+                        DoorStop.play();
+                        doors_object.position.z = doors_height_open;
+                        doors_status = ds_none;
+                    }
+                }
+                else if (doors_status == ds_closing) {
+                    doors_progress++;
+                    doors_object.position.z = doors_height_open + (doors_height_closed - doors_height_open) * doors_progress / 100;
+                    if (doors_progress >= 100) {
+                        DoorOpen.pause();
+                        DoorStop.play();
+                        doors_object.position.z = doors_height_closed;
+                        doors_status = ds_none;
+                    }
+                }
+            }
+
+            //
+            function process_bullets() {
+                // bullet movement
+                const bulletspeed = 30; // unit is m/sec.
+                let touch = false;
+                for (i of bullet) {
+                    if (i.status == bs_none) {
+                        i.object.visible = false;
+                        i.fireball.visible = false;
+                    }
+                    else if (i.status == bs_inshoot) {
+                        touch = true;
+                        i.object.visible = true;
+                        i.fireball.visible = true;
+                        let backup_position = i.object.position.clone()
+                        i.object.position.set(i.object.position.x + bulletspeed * time_elapsed / 1000 * Math.cos(i.angle), i.object.position.y + bulletspeed * time_elapsed / 1000 * Math.sin(i.angle), i.object.position.z);
+                        // check collision
+                        i.fireball.scale.set(i.x, i.x, i.x);
+                        if (thereis_collision2("1172", backup_position, i.object.position, i.object, -1, false)) {
+                            i.object.visible = false;
+                            i.fireball.visible = false;
+                            if (collision_reason == cr_aliens || collision_object.name == 'alien') {
+                                scene.remove(collision_object);
+                                let tmp = new THREE.Mesh(new THREE.BoxGeometry(sz_aliens, 2 * sz_aliens, .5), mat_deadaliens);
+                                tmp.position.set(collision_object.position.x, collision_object.position.y, 0);
+                                scene.add(tmp);
+                                aliens[collision_index].object = tmp;
+                                aliens[collision_index].status = al_dead;
+                                Sterben.play();
+                                ++score;
+                                if (!mymagazine.visible) {
+                                    mymagazine.visible = true;
+                                    mymagazine.position.set(collision_object.position.x, collision_object.position.y, mymagazine.position.z);
+                                }
+                            }
+                            else if (collision_reason == cr_labwalls || collision_object.name == 'window') {
+                                collision_object.visible = false;
+                                HBouff.play();
+                            }
+                            else if (collision_reason == cr_labwalls || collision_object.name == 'wall') {
+                                HBouff.play();
+                            }
+                            i.status = bs_none;
+                        }
+                        //
+                        i.x++;
+                        if (i.x > 20) {
+                            i.fireball.visible = false;
+                            firelight.visible = false;
+                        }
+                        if (i.x > 300) i.status = bs_none;
+                    }
+                }
+                if (!touch) {
+                    firelight.visible = false;
+                }
+            }
+
+            function calc_cartesian(vec, angle) {
+                vec.x = Math.cos(angle);
+                vec.y = Math.sin(angle);
+            }
+
+            const d_omega0 = 2 * Math.PI / 3000;
+            var v_omegaleft = 0;
+            var v_omegaright = 0;
+
+            // calculate params for camera
+            const camtoegodistance0 = 0;
+            var camtoegodistance = camtoegodistance0;
+            var cam_lookatDir_offset = -.5;
+            var cam_zoffset0 = .5;
+            var cam_zoffset = cam_zoffset0;
+            var cam_vertangle = 0;
+            var lookatDir = new THREE.Vector3();
+            var CP = new THREE.Vector3();
+            function calc_cam_params(cam, lookatPoint, up) {
+                cam.copy(myegogun.position);
+                cam.x += cam_lookatDir_offset * Math.cos(myego_angle);
+                cam.y += cam_lookatDir_offset * Math.sin(myego_angle);
+                cam.z += cam_zoffset;
+                lookatPoint.copy(cam);
+                lookatPoint.x += 2 * sz_grid * Math.cos(myego_angle);
+                lookatPoint.y += 2 * sz_grid * Math.sin(myego_angle);
+                lookatDir.copy(lookatPoint);
+                cam.z += camtoegodistance;
+                lookatDir.sub(cam);
+                CP.x = Math.cos(myego_angle + Math.PI / 2);
+                CP.y = Math.sin(myego_angle + Math.PI / 2);
+                CP.z = 0;
+                up.crossVectors(lookatDir, CP);
+                //console.log("cam= (" + cam.x + ", " + cam.y + ", " + cam.z + ", " + ")");
+                //console.log("lookat= (" + lookatPoint.x + ", " + lookatPoint.y + ", " + lookatPoint.z + ", " + ")");
+                //console.log("CP= (" + CP.x + ", " + CP.y + ", " + CP.z + ", " + ")");
+                //console.log("up= (" + up.x + ", " + up.y + ", " + up.z + ", " + ")");
+            }
+            //
+            function get_abullet() {
+                for (i of bullet) {
+                    if (i.status == bs_none) return i;
+                }
+                return undefined;
+            }
+            var egospeed = 0;
+            const ego_maxspeed = 20; // unit is m/sec ...1m is 1 unit in THREE.js coordinate system
+            const ego_acceleration = 15; // unit is m/sec^2 ...1m is 1 unit in THREE.js coordinate system
+            const ego_maxomega = Math.PI * 2; // unit is Radiant/sec
+            const ego_domega_dt = Math.PI * 2; // unit is Radiant/sec^2
+            //
+            function process_ego() {
+                // rotate ego
+                var backup_position = myego.position.clone();
+                var backup_rotation = myego.rotation.clone();
+                var backup_angle = myego_angle;
+                if (mouseStatus == ms_down) {
+                    myego_angle = mouseAngle0 + mouseDeltaAngle;
+                }
+                else if (mouseStatus == ms_driving) {
+                    myego_angle += mouseDeltaAngle * time_elapsed / 1000;
+                    console.log("mouseDeltaAngle=" + mouseDeltaAngle);
+                }
+                else {
+                    if (pressedKeys[37] && !pressedKeys[18]) {
+                        //left
+                        v_omegaleft += ego_domega_dt * time_elapsed / 1000;
+                        if (v_omegaleft > ego_maxomega) v_omegaleft = ego_maxomega;
+                        myego_angle += v_omegaleft * time_elapsed / 1000;
+                    }
+                    else {
+                        v_omegaleft = 0;
+                    }
+                    if (pressedKeys[39] && !pressedKeys[18]) {
+                        //right
+                        v_omegaright += ego_domega_dt * time_elapsed / 1000;
+                        if (v_omegaright > ego_maxomega) v_omegaright = ego_maxomega;
+                        myego_angle -= v_omegaright * time_elapsed / 1000;
+                    }
+                    else {
+                        v_omegaright = 0;
+                    }
+                }
+                calc_cartesian(myego_direction, myego_angle)
+                myegogun.rotation.z = Math.PI / 2 + myego_angle;
+                myegogun.position.set(myego.position.x, myego.position.y, 1.5);
+                // update egospeed
+                if (pressedKeys[38] || pressedKeys[40] || pressedKeys[188] || pressedKeys[190]) {
+                    egospeed += ego_acceleration * time_elapsed / 1000;
+                    if (egospeed > ego_maxspeed) egospeed = ego_maxspeed;
+                }
+                else {
+                    egospeed = 0;
+                }
+                // experimental
+                if (pressedKeys[106]) {
+                    pressedKeys[106] = false;
+                    // experimental
+                    let pos0 = myego.position.clone();
+                    let pos1 = myego.position.clone();
+                    pos1.x += ego_maxspeed * time_elapsed / 1000 * myego_direction.x;
+                    pos1.y += ego_maxspeed * time_elapsed / 1000 * myego_direction.y;
+                    let b = thereis_collision2("experimental", pos0, pos1, myego, -1, false, true);
+                    //console.log("thereis_collision2()=" + b);
+                }
+                if (egospeed > 0) {
+                    // move ego x
+                    var backup_position = myego.position.clone();
+                    if (pressedKeys[38]) {
+                        //up
+                        myego.position.x += egospeed * time_elapsed / 1000 * myego_direction.x;
+                    }
+                    if (pressedKeys[40]) {
+                        //down
+                        myego.position.x -= egospeed * time_elapsed / 1000 * myego_direction.x;
+                    }
+                    if (pressedKeys[188] || (pressedKeys[37] && pressedKeys[18])) {
+                        // strafe left
+                        myego.position.x -= egospeed * time_elapsed / 1000 * myego_direction.y;
+                    }
+                    if (pressedKeys[190] || (pressedKeys[39] && pressedKeys[18])) {
+                        // strafe right
+                        myego.position.x += egospeed * time_elapsed / 1000 * myego_direction.y;
+                    }
+                    if (thereis_collision2("1334", backup_position, myego.position, myego, -1, false, true)) {
+                        myego.position.set(backup_position.x, backup_position.y, backup_position.z)
+                    }
+                    // move ego y
+                    var backup_position = myego.position.clone();
+                    if (pressedKeys[38]) {
+                        //up
+                        myego.position.y += egospeed * time_elapsed / 1000 * myego_direction.y;
+                    }
+                    if (pressedKeys[40]) {
+                        //down
+                        myego.position.y -= egospeed * time_elapsed / 1000 * myego_direction.y;
+                    }
+                    if (pressedKeys[188] || (pressedKeys[37] && pressedKeys[18])) {
+                        // strafe left
+                        myego.position.y += egospeed * time_elapsed / 1000 * myego_direction.x;
+                    }
+                    if (pressedKeys[190] || (pressedKeys[39] && pressedKeys[18])) {
+                        // strafe right
+                        myego.position.y -= egospeed * time_elapsed / 1000 * myego_direction.x;
+                    }
+                    if (thereis_collision2("1355", backup_position, myego.position, myego, -1, false, true)) {
+                        myego.position.set(backup_position.x, backup_position.y, backup_position.z)
+                    }
+                }
+                // check magazine
+                {
+                    if (mymagazine.visible) {
+                        let d = myego.position.distanceTo(mymagazine.position);
+                        if (d < ego_radius * 3) {
+                            mymagazine.visible = false;
+                            Durchladen.play();
+                            bullets_ingun += max_bullet_in_magazine;
+                            if (bullets_ingun > max_bullet_in_magazine) bullets_ingun = max_bullet_in_magazine;
+                        }
+                    }
+                }
+                // check health doses
+                {
+                    for (let j of labhealthdoses) {
+                        if (j.visible) {
+                            let d = myego.position.distanceTo(j.position);
+                            if (d < ego_radius * 2) {
+                                j.visible = false;
+                                HAah.play();
+                                status_health += 50;
+                                if (status_health > 100) status_health = 100;
+                            }
+                        }
+                    }
+                }
+                // check armor
+                {
+                    for (let j of labarmors) {
+                        if (j.visible) {
+                            let d = myego.position.distanceTo(j.position);
+                            if (d < ego_radius * 2) {
+                                j.visible = false;
+                                HZipper.play();
+                                status_armor += 2;
+                                if (status_armor > 100) status_armor = 100;
+                            }
+                        }
+                    }
+                }
+                firelight.position.set(myego.position.x, myego.position.y, myego.position.z);
+                // Kamera positionieren
+                var C = new THREE.Vector3();
+                var M = new THREE.Vector3();
+                var Up = new THREE.Vector3();
+                calc_cam_params(C, M, Up);
+                camera.position.set(C.x, C.y, C.z);
+                camera.lookAt(M);
+                camera.up.set(Up.x, Up.y, Up.z);
+                // adjust spotlight
+                myegospotlight.position.set(myego.position.x - myego_direction.x, myego.position.y - myego_direction.y, 0.5);
+                // shoot
+                bullets_onhold--;
+                if (bullets_onhold < 0) bullets_onhold = 0;
+                if (pressedKeys[17]) {
+                    // Ctrl = shoot
+                    if (bullets_ingun > 0 && bullets_onhold <= 0) {
+                        bullets_ingun--;
+                        let i = get_abullet();
+                        const direction_variance = 0.1;
+                        i.angle = myego_angle + (Math.random() - .5) * direction_variance;
+                        i.status = bs_inshoot;
+                        i.x = 0;
+                        i.object.position.set(myego.position.x, myego.position.y, myego.position.z);
+                        i.fireball.position.set(myego.position.x, myego.position.y, myego.position.z);
+                        firelight.position.set(myego.position.x, myego.position.y, myego.position.z);
+                        firelight.visible = true;
+                        HTschioo.play();
+                        bullets_onhold = 10;
+                    } else {
+                        EmptyClick.play();
+                    }
+                }
+                // other events
+                switch (eventq) {
+                    case 70: //f
+                        cam_lookatDir_offset -= .1;
+                        console.log("cam_lookatDir_offset=" + cam_lookatDir_offset);
+                        break;
+                    case 66: //b
+                        console.log("cam_lookatDir_offset=" + cam_lookatDir_offset);
+                        cam_lookatDir_offset += .1;
+                        break;
+                    case 85: //u
+                        break;
+                    case 80: //d
+                        break;
+                    case 79: //o or O
+                    case 111:
+                        camtoegodistance += 20;
+                        myceiling.visible = false;
+                        if (camtoegodistance > 65) {
+                            camtoegodistance = camtoegodistance0;
+                            myceiling.visible = true;
+                        }
+                        break;
+                }
+                eventq = 0;
+            }
+
+            var title_t0 = 0;
+            var time_last = 0;
+            var time_elapsed = 0;
+            function animate() {
+                let date_now = Date.now();
+                if (time_last == 0) {
+                    time_last = date_now
+                    time_elapsed = 0;
+                }
+                else {
+                    time_elapsed = date_now - time_last;
+                    time_last = date_now;
+                }
+                //console.log("time_elapsed=" + time_elapsed);
+                time_cnt++;
+                {
+                    let s = 1 + (Math.sin(time_cnt / 50) + Math.cos(time_cnt / 60)) / 20;
+                    mytransporter.scale.set(s, s, s);
+                }
+                if (status == st_insertcoin) {
+                    textH.style.visibility = 'visible';
+                    textH.style.backgroundColor = '#000020' + parseInt((Math.sin(Date.now()/1000) + 1) / 2 * 0xff).toString(16).padStart(2, '0')
+                    textH.innerHTML = "<h3 align=center> ZOMB!ES </h3><h3 align=center> Press ENTER to start</h3>";
+                    if (touchDevice) {
+                        enterButton.style.left = parseInt((window.innerWidth - enterButton.offsetWidth) / 2) + 'px';
+                        enterButton.style.visibility = "visible";
+                    } else {
+                        enterButton.style.visibility = "hidden";
+                        fwdButton.style.visibility = "hidden";
+                        bwdButton.style.visibility = "hidden";
+                        leftButton.style.visibility = "hidden";
+                        rightButton.style.visibility = "hidden";
+                        shootButton.style.visibility = "hidden";
+                        openButton.style.visibility = "hidden";
+                    }
+                    switch (eventq) {
+                        case 13:
+                            init_game();
+                            set_status(st_title);
+                            break;
+                    }
+                    eventq = 0;
+                }
+                else if (status == st_gameover) {
+                    textH.style.visibility = 'visible';
+                    textH.style.backgroundColor = 'transparent';
+                    textH.innerHTML = "<h3 align=center> GAME OVER </h3><h3 align=center> Press ENTER to start</h3>";
+                    if (touchDevice) {
+                        enterButton.style.visibility = "visible";
+                    }
+                    process_aliens();
+                    render_game();
+                    switch (eventq) {
+                        case 13:
+                            status_health = 80;
+                            ZombieEating.pause();
+                            Invaders.play();
+                            init_game();
+                            set_status(st_play);
+                            break;
+                    }
+                    eventq = 0;
+                }
+                else if (status == st_play) {
+                    if (touchDevice) {
+                        enterButton.style.visibility = "hidden";
+                    }
+                    textH.style.visibility = 'hidden';
+                    process_aliens();
+                    process_bullets();
+                    process_ego();
+                    process_doors();
+                    render_game();
+                    if (myego.position.distanceTo(mytransporter.position) < ego_radius * 4) {
+                        mylevel++;
+                        if (mylevel < lab.length) {
+                            init_game();
+                            set_status(st_title);
+                        }
+                        else {
+                            set_status(st_gameover);
+                            mylevel = 0;
+                        }
+                    }
+                }
+                else if (status == st_title) {
+                    if (title_t0 == 0) {
+                        title_t0 = Date.now();
+                        Level.play();
+                        Invaders.pause();
+                    }
+                    const title_d = 4000;
+                    let title_pct = (Date.now() - title_t0) * 100 / title_d;
+                    if (title_pct >= 100) {
+                        textH.style.visibility = 'hidden';
+                        title_t0 = 0;
+                        set_status(st_play);
+                        Invaders.play();
+                    } else {
+                        enterButton.style.visibility = "hidden";
+                        textH.style.visibility = 'visible';
+                        textH.style.backgroundColor = '#000020' + parseInt((100 - title_pct) * 0xff / 100).toString(16).padStart(2, '0')
+                        textH.innerHTML = "<h3 align=center> " + lab[mylevel].title + "";
+                    }
+                    process_ego();
+                    render_game();
+                }
+
+                // Keep the animation going
+                requestAnimationFrame(animate);
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+
+
+</body>
+
+</html>
+
